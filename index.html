@@ -67,6 +67,7 @@
   .panel.from-right { right: 0; border-left: 1px solid #334155; transform: translateX(100%); }
   .panel.from-left { left: 0; border-right: 1px solid #334155; transform: translateX(-100%); }
   .panel.open { transform: translateX(0); }
+  .panel.detail-open { width: 760px; }
 
   .panel-header { padding: 1.5rem 1.5rem 0; flex-shrink: 0; }
   .panel-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
@@ -512,6 +513,7 @@ function initGdprPanel() {
     detailType = type;
     detailNr = nr;
     header.querySelectorAll('.panel-tabs, .panel-search').forEach(e => e.style.display = 'none');
+    el.classList.add('detail-open');
     type === 'art' ? renderArtDetail(nr) : renderRecDetail(nr);
   }
 
@@ -570,6 +572,7 @@ function initGdprPanel() {
 
   function hideDetail() {
     detailMode = false; detailNr = null; detailType = null;
+    el.classList.remove('detail-open');
     header.querySelectorAll('.panel-tabs, .panel-search').forEach(e => e.style.display = '');
     renderList(); list.scrollTop = 0;
     setTimeout(() => search.focus(), 50);
@@ -611,6 +614,7 @@ function initGdprPanel() {
       search.value = ''; activeIdx = -1;
       if (detailMode) {
         detailMode = false; detailNr = null; detailType = null;
+        el.classList.remove('detail-open');
         header.querySelectorAll('.panel-tabs, .panel-search').forEach(e => e.style.display = '');
       }
     },
