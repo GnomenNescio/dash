@@ -6,7 +6,7 @@
 <title>Hjem</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@300;400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,400&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -68,20 +68,76 @@
   .panel.from-left { left: 0; border-right: 1px solid #334155; transform: translateX(-100%); }
   .panel.open { transform: translateX(0); }
 
-  /* ── Lesemodus: fullskjerm med begrenset linjelengde ── */
+  /* ── Lesemodus: lys, klassisk lesevisning ─────────────── */
   .panel.detail-open {
     width: 100vw;
     border-left: none;
     border-right: none;
+    background: #f8f4ef;
+  }
+  .panel.detail-open .panel-header {
+    background: #f8f4ef;
+  }
+  .panel.detail-open .panel-title {
+    color: #b45a3c;
+  }
+  .panel.detail-open .panel-close {
+    color: #8a7d74;
+  }
+  .panel.detail-open .panel-close:hover {
+    color: #b45a3c;
   }
   .panel.detail-open .panel-list {
     max-width: 68ch;
     margin: 0 auto;
-    padding: 2rem 1.5rem 3rem;
+    padding: 2rem 1.5rem 4rem;
+    scrollbar-color: #d6ccc2 transparent;
+  }
+  .panel.detail-open .panel-list::-webkit-scrollbar-thumb {
+    background: #d6ccc2;
+  }
+  .panel.detail-open .detail-nav {
+    border-bottom-color: #e0d6cc;
+  }
+  .panel.detail-open .detail-back {
+    color: #8a7d74;
+  }
+  .panel.detail-open .detail-back:hover {
+    color: #b45a3c;
+  }
+  .panel.detail-open .rettsdata-link {
+    color: #8a7d74;
+  }
+  .panel.detail-open .rettsdata-link:hover {
+    color: #b45a3c;
+  }
+  .panel.detail-open .detail-meta {
+    color: #8a7d74;
+    font-family: 'Azeret Mono', monospace;
+  }
+  .panel.detail-open .detail-title {
+    color: #b45a3c;
+    font-family: 'Source Serif 4', serif;
+    font-size: 1.3rem;
+    font-weight: 500;
   }
   .panel.detail-open .detail-body {
+    font-family: 'Source Serif 4', serif;
     font-size: 1.15rem;
+    font-weight: 400;
     line-height: 2;
+    color: #2c2824;
+  }
+  .panel.detail-open .detail-footer {
+    border-top-color: #e0d6cc;
+  }
+  .panel.detail-open .detail-prev,
+  .panel.detail-open .detail-next {
+    color: #8a7d74;
+  }
+  .panel.detail-open .detail-prev:hover,
+  .panel.detail-open .detail-next:hover {
+    color: #b45a3c;
   }
 
   .panel-header { padding: 1.5rem 1.5rem 0; flex-shrink: 0; }
