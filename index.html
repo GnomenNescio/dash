@@ -61,7 +61,10 @@
 
   .panel {
     position: fixed; top: 0; width: 520px; height: 100vh;
-    background: #0f172a; transition: transform 0.4s cubic-bezier(0.25,0.1,0.25,1);
+    background: #0f172a;
+    transition: transform 0.4s cubic-bezier(0.25,0.1,0.25,1),
+                width 0.45s cubic-bezier(0.25,0.1,0.25,1),
+                background-color 0.5s ease;
     z-index: 100; display: flex; flex-direction: column;
   }
   .panel.from-right { right: 0; border-left: 1px solid #334155; transform: translateX(100%); }
@@ -88,7 +91,7 @@
     color: #b45a3c;
   }
   .panel.detail-open .panel-list {
-    max-width: 100ch;
+    max-width: 68ch;
     margin: 0 auto;
     padding: 2rem 1.5rem 4rem;
     scrollbar-color: #d6ccc2 transparent;
@@ -140,7 +143,7 @@
     color: #b45a3c;
   }
 
-  .panel-header { padding: 1.5rem 1.5rem 0; flex-shrink: 0; }
+  .panel-header { padding: 1.5rem 1.5rem 0; flex-shrink: 0; transition: background-color 0.5s ease; }
   .panel-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
   .panel-title { font-size: 1.1rem; font-weight: 400; color: #f59e0b; letter-spacing: 0.05em; }
   .panel-close {
