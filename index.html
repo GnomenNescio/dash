@@ -127,6 +127,73 @@
     margin-bottom: 0.5rem;
   }
 
+  /* ── GDPR detail view ─────────────────────────────────────── */
+  .detail-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid #334155;
+  }
+  .detail-back {
+    background: none; border: none; color: #64748b; font: inherit;
+    font-size: 0.95rem; cursor: pointer; padding: 0.2em 0; transition: color 0.2s;
+  }
+  .detail-back:hover { color: #f59e0b; }
+  .rettsdata-link {
+    color: #64748b; font-size: 0.9rem; text-decoration: none; transition: color 0.2s;
+  }
+  .rettsdata-link:hover { color: #f59e0b; }
+  .detail-meta {
+    color: #475569; font-size: 0.85rem; font-weight: 300; margin-bottom: 0.3rem;
+  }
+  .detail-title {
+    color: #f59e0b; font-size: 1.05rem; font-weight: 400; line-height: 1.5;
+    margin-bottom: 1.2rem;
+  }
+  .detail-body {
+    color: #cbd5e1; font-size: 0.92rem; font-weight: 300; line-height: 1.75;
+    padding-bottom: 1rem;
+  }
+  .detail-body .art-para { margin-bottom: 0.9em; }
+  .detail-body .art-points { padding-left: 1.4em; margin-bottom: 0.9em; }
+  .detail-body .art-point { margin-bottom: 0.25em; }
+  .detail-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.8rem 0; border-top: 1px solid #334155; margin-top: 0.5rem;
+  }
+  .detail-prev, .detail-next {
+    background: none; border: none; color: #64748b; font: inherit;
+    font-size: 0.9rem; cursor: pointer; padding: 0.2em 0; transition: color 0.2s;
+  }
+  .detail-prev:hover, .detail-next:hover { color: #f59e0b; }
+  .search-snippet {
+    display: block; font-size: 0.8rem; color: #64748b; font-weight: 300;
+    margin-top: 0.2em; line-height: 1.5;
+  }
+  .search-snippet mark {
+    background: rgba(245,158,11,0.25); color: #f59e0b;
+    border-radius: 2px; padding: 0 0.15em;
+  }
+  .panel-item:hover .search-snippet,
+  .panel-item.kb-active .search-snippet { color: #1e293b; }
+  .panel-item:hover .search-snippet mark,
+  .panel-item.kb-active .search-snippet mark {
+    background: rgba(30,41,59,0.2); color: #1e293b;
+  }
+  .chapter-divider {
+    display: flex; align-items: baseline; gap: 0.8em;
+    padding: 0.8em 0.3em 0.3em; color: #475569;
+    font-size: 0.85rem; font-weight: 400; letter-spacing: 0.03em;
+    border-bottom: none; pointer-events: none;
+  }
+  .chapter-divider .num { flex-shrink: 0; width: 6em; text-align: right; color: #475569; }
+  .chapter-divider .title { flex: 1; }
+  .rec-preview {
+    display: block; font-size: 0.8rem; color: #64748b; font-weight: 300;
+    margin-top: 0.15em; line-height: 1.4; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .panel-item:hover .rec-preview,
+  .panel-item.kb-active .rec-preview { color: rgba(30,41,59,0.7); }
+
   @media (max-width: 600px) {
     .page { font-size: 1.3rem; }
     .panel { width: 100%; }
@@ -163,7 +230,7 @@
         <button class="panel-tab active" data-tab="art">Art. 1–99</button>
         <button class="panel-tab" data-tab="rec">Rec. 1–173</button>
       </div>
-      <input type="text" class="panel-search" data-panel="gdpr" placeholder="Søk nummer eller tittel...">
+      <input type="text" class="panel-search" data-panel="gdpr" placeholder="Søk nummer, tittel eller innhold...">
     </div>
     <div class="panel-list" data-panel="gdpr"></div>
   </div>
@@ -226,12 +293,16 @@
     </div>
   </div>
 
-<!-- Data loaded from separate file -->
+<!-- Data files -->
 <script src="GDPRdata.js"></script>
+<script src="gdpr.js"></script>
 
 <script>
 const panels = {};
 
+/* ================================================================
+   Generic panel init (used by EDPB)
+   ================================================================ */
 function initPanel(id, data, urlFn, prefixMap) {
   const el = document.getElementById('panel-' + id);
   const search = el.querySelector('.panel-search');
@@ -241,20 +312,12 @@ function initPanel(id, data, urlFn, prefixMap) {
   let currentTab = keys[0];
   let activeIdx = -1;
 
-  const roman = {1:'i',2:'ii',3:'iii',4:'iv',5:'v',6:'vi',7:'vii',8:'viii',9:'ix',10:'x',11:'xi'};
-
   function render() {
-    const raw = search.value.toLowerCase().trim();
-    const q = raw.replace('chapter', 'ch.').replace('article', 'art.').replace('recital', 'rec.');
+    const q = search.value.toLowerCase().trim();
     const prefix = prefixMap && prefixMap[currentTab] || '';
     const items = data[currentTab].filter(item => {
       const label = typeof item[0] === 'number' && prefix ? `${prefix} ${item[0]}` : String(item[0]);
-      let searchable = label.toLowerCase() + ' ' + item[1].toLowerCase();
-      if (String(item[0]).startsWith('Ch.')) {
-        const n = parseInt(String(item[0]).replace('Ch. ', ''));
-        if (roman[n]) searchable += ' chapter ' + roman[n] + ' ch. ' + roman[n];
-      }
-      return searchable.includes(q);
+      return (label.toLowerCase() + ' ' + item[1].toLowerCase()).includes(q);
     });
     if (!items.length) { list.innerHTML = '<div class="panel-empty">Ingen treff</div>'; return; }
     list.innerHTML = items.map(item => {
@@ -265,8 +328,7 @@ function initPanel(id, data, urlFn, prefixMap) {
   }
 
   function updateActive() {
-    const items = list.querySelectorAll('.panel-item');
-    items.forEach((el, i) => {
+    list.querySelectorAll('.panel-item').forEach((el, i) => {
       el.classList.toggle('kb-active', i === activeIdx);
       if (i === activeIdx) el.scrollIntoView({ block: 'nearest' });
     });
@@ -301,11 +363,7 @@ function initPanel(id, data, urlFn, prefixMap) {
       if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx-1, -1); updateActive(); if (activeIdx===-1) search.focus(); }
       else if (e.key === 'Enter' && activeIdx >= 0 && items[activeIdx]) { e.preventDefault(); items[activeIdx].click(); }
-      else if (e.key === 'Tab' && !e.shiftKey) {
-        e.preventDefault();
-        activeIdx = Math.min(activeIdx + 1, items.length - 1);
-        updateActive();
-      }
+      else if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
       else if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !search.value && keys.length > 1) {
         e.preventDefault();
         const i = keys.indexOf(currentTab);
@@ -318,9 +376,276 @@ function initPanel(id, data, urlFn, prefixMap) {
   };
 }
 
+/* ================================================================
+   GDPR panel (enhanced – uses gdpr.js for content)
+   ================================================================ */
+function initGdprPanel() {
+  const el = document.getElementById('panel-gdpr');
+  const header = el.querySelector('.panel-header');
+  const search = el.querySelector('.panel-search');
+  const list = el.querySelector('.panel-list');
+  const tabBtns = el.querySelectorAll('.panel-tab');
+
+  let currentTab = 'art';
+  let activeIdx = -1;
+  let detailMode = false;
+  let detailNr = null;
+  let detailType = null;
+
+  const artMap = {};
+  gdpr.articles.forEach(a => { artMap[a.nr] = a; });
+  const recMap = {};
+  gdpr.recitals.forEach(r => { recMap[r.nr] = r; });
+  const chMap = {};
+  gdpr.chapters.forEach(c => { chMap[c.nr] = c; });
+
+  const artNrs = gdpr.articles.map(a => a.nr).sort((a, b) => a - b);
+  const recNrs = gdpr.recitals.map(r => r.nr).sort((a, b) => a - b);
+
+  function rettsdataUrl(nr) {
+    return `https://min.rettsdata.no/Dokument/gL20180615z2D38z2EGDPRz5FNOz2DART${nr}`;
+  }
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function formatText(text) {
+    const blocks = text.split('\n\n');
+    let html = '';
+    for (const block of blocks) {
+      const t = block.trim();
+      if (!t) continue;
+      const lines = t.split('\n');
+      if (lines.some(l => /^[a-zæøå]\)\s/.test(l.trim()))) {
+        html += '<div class="art-points">';
+        for (const line of lines) html += `<p class="art-point">${esc(line.trim())}</p>`;
+        html += '</div>';
+      } else {
+        html += `<p class="art-para">${esc(t)}</p>`;
+      }
+    }
+    return html;
+  }
+
+  function truncate(text, len) {
+    const clean = text.replace(/\n+/g, ' ');
+    return clean.length <= len ? clean : clean.slice(0, len).replace(/\s+\S*$/, '') + ' …';
+  }
+
+  function snippet(text, q, len) {
+    len = len || 90;
+    const i = text.toLowerCase().indexOf(q.toLowerCase());
+    if (i === -1) return '';
+    const a = Math.max(0, i - Math.floor(len / 2));
+    const b = Math.min(text.length, i + q.length + Math.floor(len / 2));
+    let s = (a > 0 ? '… ' : '') + text.slice(a, b) + (b < text.length ? ' …' : '');
+    const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    s = esc(s).replace(re, '<mark>$1</mark>');
+    return s;
+  }
+
+  // ── List rendering ──────────────────────────────────────────
+  function renderList() {
+    activeIdx = -1;
+    currentTab === 'art' ? renderArticles() : renderRecitals();
+  }
+
+  function renderArticles() {
+    const q = search.value.toLowerCase().trim();
+    let html = '', any = false;
+
+    for (const ch of gdpr.chapters) {
+      const matches = gdpr.articles.filter(a => a.ch === ch.nr).filter(a => {
+        if (!q) return true;
+        if ((`art. ${a.nr} ${a.no}`).toLowerCase().includes(q)) return true;
+        return a.text.toLowerCase().includes(q);
+      });
+      if (!matches.length) continue;
+      any = true;
+      html += `<div class="chapter-divider"><span class="num">Kap. ${ch.nr}</span><span class="title">${esc(ch.no)}</span></div>`;
+
+      for (const a of matches) {
+        const titleHit = !q || (`art. ${a.nr} ${a.no}`).toLowerCase().includes(q);
+        const snip = !titleHit && q ? `<span class="search-snippet">${snippet(a.text, q)}</span>` : '';
+        html += `<a class="panel-item" href="#" data-detail="art" data-nr="${a.nr}"><span class="num">Art. ${a.nr}</span><span class="title">${esc(a.no)}${snip}</span></a>`;
+      }
+    }
+    list.innerHTML = any ? html : '<div class="panel-empty">Ingen treff</div>';
+    bindClicks();
+  }
+
+  function renderRecitals() {
+    const q = search.value.toLowerCase().trim();
+    let html = '', any = false;
+
+    for (const r of gdpr.recitals) {
+      const preview = truncate(r.no, 80);
+      if (q) {
+        const inPreview = (`rec. ${r.nr} ` + preview.toLowerCase()).includes(q);
+        const inBody = r.no.toLowerCase().includes(q);
+        if (!inPreview && !inBody) continue;
+        any = true;
+        const snip = !inPreview && inBody ? `<span class="search-snippet">${snippet(r.no, q)}</span>` : '';
+        html += `<a class="panel-item" href="#" data-detail="rec" data-nr="${r.nr}"><span class="num">Rec. ${r.nr}</span><span class="title"><span class="rec-preview">${esc(preview)}</span>${snip}</span></a>`;
+      } else {
+        any = true;
+        html += `<a class="panel-item" href="#" data-detail="rec" data-nr="${r.nr}"><span class="num">Rec. ${r.nr}</span><span class="title"><span class="rec-preview">${esc(preview)}</span></span></a>`;
+      }
+    }
+    list.innerHTML = any ? html : '<div class="panel-empty">Ingen treff</div>';
+    bindClicks();
+  }
+
+  function bindClicks() {
+    list.querySelectorAll('[data-detail]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        showDetail(el.dataset.detail, parseInt(el.dataset.nr));
+      });
+    });
+  }
+
+  // ── Detail view ─────────────────────────────────────────────
+  function showDetail(type, nr) {
+    detailMode = true;
+    detailType = type;
+    detailNr = nr;
+    header.querySelectorAll('.panel-tabs, .panel-search').forEach(e => e.style.display = 'none');
+    type === 'art' ? renderArtDetail(nr) : renderRecDetail(nr);
+  }
+
+  function renderArtDetail(nr) {
+    const a = artMap[nr]; if (!a) return;
+    const ch = chMap[a.ch];
+    const idx = artNrs.indexOf(nr);
+    const prev = idx > 0 ? artNrs[idx - 1] : null;
+    const next = idx < artNrs.length - 1 ? artNrs[idx + 1] : null;
+
+    list.innerHTML = `
+      <div class="detail-nav">
+        <button class="detail-back">← Tilbake</button>
+        <a class="rettsdata-link" href="${rettsdataUrl(nr)}" target="_blank" rel="noopener">Rettsdata →</a>
+      </div>
+      ${ch ? `<div class="detail-meta">Kap. ${ch.nr} — ${esc(ch.no)}</div>` : ''}
+      <div class="detail-title">Art. ${nr} — ${esc(a.no)}</div>
+      <div class="detail-body">${formatText(a.text)}</div>
+      <div class="detail-footer">
+        ${prev != null ? `<button class="detail-prev" data-nr="${prev}">← Art. ${prev}</button>` : '<span></span>'}
+        ${next != null ? `<button class="detail-next" data-nr="${next}">Art. ${next} →</button>` : '<span></span>'}
+      </div>`;
+    list.scrollTop = 0;
+    bindNav('art');
+  }
+
+  function renderRecDetail(nr) {
+    const r = recMap[nr]; if (!r) return;
+    const idx = recNrs.indexOf(nr);
+    const prev = idx > 0 ? recNrs[idx - 1] : null;
+    const next = idx < recNrs.length - 1 ? recNrs[idx + 1] : null;
+    const body = r.no.split(/\n\n|\n/).filter(Boolean).map(p => `<p class="art-para">${esc(p.trim())}</p>`).join('');
+
+    list.innerHTML = `
+      <div class="detail-nav">
+        <button class="detail-back">← Tilbake</button>
+        <span></span>
+      </div>
+      <div class="detail-title">Fortalepunkt ${nr}</div>
+      <div class="detail-body">${body}</div>
+      <div class="detail-footer">
+        ${prev != null ? `<button class="detail-prev" data-nr="${prev}">← Rec. ${prev}</button>` : '<span></span>'}
+        ${next != null ? `<button class="detail-next" data-nr="${next}">Rec. ${next} →</button>` : '<span></span>'}
+      </div>`;
+    list.scrollTop = 0;
+    bindNav('rec');
+  }
+
+  function bindNav(type) {
+    list.querySelector('.detail-back').addEventListener('click', hideDetail);
+    const p = list.querySelector('.detail-prev');
+    const n = list.querySelector('.detail-next');
+    if (p) p.addEventListener('click', () => showDetail(type, parseInt(p.dataset.nr)));
+    if (n) n.addEventListener('click', () => showDetail(type, parseInt(n.dataset.nr)));
+  }
+
+  function hideDetail() {
+    detailMode = false; detailNr = null; detailType = null;
+    header.querySelectorAll('.panel-tabs, .panel-search').forEach(e => e.style.display = '');
+    renderList(); list.scrollTop = 0;
+    setTimeout(() => search.focus(), 50);
+  }
+
+  // ── Keyboard active highlight ───────────────────────────────
+  function updateActive() {
+    list.querySelectorAll('.panel-item').forEach((el, i) => {
+      el.classList.toggle('kb-active', i === activeIdx);
+      if (i === activeIdx) el.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  // ── Tabs ────────────────────────────────────────────────────
+  tabBtns.forEach(tab => tab.addEventListener('click', () => {
+    currentTab = tab.dataset.tab;
+    tabBtns.forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
+    search.value = ''; renderList(); list.scrollTop = 0; search.focus();
+  }));
+
+  search.addEventListener('input', () => renderList());
+
+  // ── Panel interface ─────────────────────────────────────────
+  panels['gdpr'] = {
+    el, search, list, render: renderList,
+    open() {
+      closeAll();
+      el.classList.add('open');
+      document.getElementById('overlay').classList.add('open');
+      document.querySelector('[data-panel="gdpr"].panel-trigger')?.classList.add('active');
+      if (detailMode) hideDetail();
+      renderList();
+      setTimeout(() => search.focus(), 300);
+    },
+    close() {
+      el.classList.remove('open');
+      document.getElementById('overlay').classList.remove('open');
+      document.querySelector('[data-panel="gdpr"].panel-trigger')?.classList.remove('active');
+      search.value = ''; activeIdx = -1;
+      if (detailMode) {
+        detailMode = false; detailNr = null; detailType = null;
+        header.querySelectorAll('.panel-tabs, .panel-search').forEach(e => e.style.display = '');
+      }
+    },
+    keydown(e) {
+      if (!el.classList.contains('open')) return;
+
+      if (detailMode) {
+        if (e.key === 'Escape') { e.preventDefault(); hideDetail(); return; }
+        if (e.key === 'ArrowLeft') { const p = list.querySelector('.detail-prev'); if (p) { e.preventDefault(); showDetail(detailType, parseInt(p.dataset.nr)); } return; }
+        if (e.key === 'ArrowRight') { const n = list.querySelector('.detail-next'); if (n) { e.preventDefault(); showDetail(detailType, parseInt(n.dataset.nr)); } return; }
+        return;
+      }
+
+      const items = list.querySelectorAll('.panel-item');
+      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx-1, -1); updateActive(); if (activeIdx===-1) search.focus(); }
+      else if (e.key === 'Enter' && activeIdx >= 0 && items[activeIdx]) { e.preventDefault(); items[activeIdx].click(); }
+      else if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
+      else if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !search.value) {
+        e.preventDefault();
+        const tabs = ['art','rec'];
+        currentTab = tabs[(tabs.indexOf(currentTab) + 1) % 2];
+        tabBtns.forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
+        renderList(); list.scrollTop = 0; search.focus();
+      }
+    }
+  };
+}
+
 function closeAll() { Object.values(panels).forEach(p => p.close()); }
 
-initPanel('gdpr', gdprData, (tab, n) => `https://gdpr.fan/${tab === 'art' ? 'a' : 'r'}${n}`, { art: 'Art.', rec: 'Rec.' });
+/* ================================================================
+   Init panels
+   ================================================================ */
+initGdprPanel();
 initPanel('edpb', edpbData, () => '#');
 
 // --- Lovdata Pro panel ---
@@ -334,18 +659,14 @@ initPanel('edpb', edpbData, () => '#');
   function findLov(q) {
     if (!q) return lovdataLookup;
     return lovdataLookup.filter(entry =>
-      entry.tags.some(tag => tag.includes(q)) ||
-      entry.title.toLowerCase().includes(q)
+      entry.tags.some(tag => tag.includes(q)) || entry.title.toLowerCase().includes(q)
     );
   }
 
   function render() {
     const q = search.value.toLowerCase().trim();
     const results = findLov(q);
-    if (!results.length) {
-      list.innerHTML = '<div class="panel-empty">Ingen treff</div>';
-      return;
-    }
+    if (!results.length) { list.innerHTML = '<div class="panel-empty">Ingen treff</div>'; return; }
     list.innerHTML = results.map(entry => {
       const url = `https://lovdata.no/pro/#document/${entry.id}`;
       const type = entry.id.startsWith('SF/') ? 'Forskrift' : entry.id.startsWith('PROP/') ? 'Forarbeid' : 'Lov';
@@ -365,12 +686,10 @@ initPanel('edpb', edpbData, () => '#');
   panels['lovdata'] = {
     el, search, list, render,
     open() {
-      closeAll();
-      el.classList.add('open');
+      closeAll(); el.classList.add('open');
       document.getElementById('overlay').classList.add('open');
       document.querySelector('[data-panel="lovdata"].panel-trigger')?.classList.add('active');
-      render();
-      setTimeout(() => search.focus(), 300);
+      render(); setTimeout(() => search.focus(), 300);
     },
     close() {
       el.classList.remove('open');
@@ -381,23 +700,15 @@ initPanel('edpb', edpbData, () => '#');
     keydown(e) {
       if (!el.classList.contains('open')) return;
       const items = list.querySelectorAll('.panel-item');
-      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); updateActive(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, -1); updateActive(); if (activeIdx === -1) search.focus(); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx-1, -1); updateActive(); if (activeIdx===-1) search.focus(); }
       else if (e.key === 'Enter') {
         e.preventDefault();
-        if (activeIdx >= 0 && items[activeIdx]) {
-          items[activeIdx].click();
-        } else if (!search.value.trim()) {
-          window.location.href = homeUrl;
-        } else if (items.length === 1) {
-          items[0].click();
-        }
+        if (activeIdx >= 0 && items[activeIdx]) items[activeIdx].click();
+        else if (!search.value.trim()) window.location.href = homeUrl;
+        else if (items.length === 1) items[0].click();
       }
-      else if (e.key === 'Tab' && !e.shiftKey) {
-        e.preventDefault();
-        activeIdx = Math.min(activeIdx + 1, items.length - 1);
-        updateActive();
-      }
+      else if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
     }
   };
 })();
@@ -413,18 +724,14 @@ initPanel('edpb', edpbData, () => '#');
   function findDT(q) {
     if (!q) return datatilsynetData;
     return datatilsynetData.filter(entry =>
-      entry.tags.some(tag => tag.includes(q)) ||
-      entry.title.toLowerCase().includes(q)
+      entry.tags.some(tag => tag.includes(q)) || entry.title.toLowerCase().includes(q)
     );
   }
 
   function render() {
     const q = search.value.toLowerCase().trim();
     const results = findDT(q);
-    if (!results.length) {
-      list.innerHTML = '<div class="panel-empty">Ingen treff</div>';
-      return;
-    }
+    if (!results.length) { list.innerHTML = '<div class="panel-empty">Ingen treff</div>'; return; }
     list.innerHTML = results.map(entry =>
       `<a class="panel-item" href="${entry.url}"><span class="title">${entry.title}</span></a>`
     ).join('');
@@ -442,12 +749,10 @@ initPanel('edpb', edpbData, () => '#');
   panels['datatilsynet'] = {
     el, search, list, render,
     open() {
-      closeAll();
-      el.classList.add('open');
+      closeAll(); el.classList.add('open');
       document.getElementById('overlay').classList.add('open');
       document.querySelector('[data-panel="datatilsynet"].panel-trigger')?.classList.add('active');
-      render();
-      setTimeout(() => search.focus(), 300);
+      render(); setTimeout(() => search.focus(), 300);
     },
     close() {
       el.classList.remove('open');
@@ -458,23 +763,15 @@ initPanel('edpb', edpbData, () => '#');
     keydown(e) {
       if (!el.classList.contains('open')) return;
       const items = list.querySelectorAll('.panel-item');
-      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); updateActive(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, -1); updateActive(); if (activeIdx === -1) search.focus(); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx-1, -1); updateActive(); if (activeIdx===-1) search.focus(); }
       else if (e.key === 'Enter') {
         e.preventDefault();
-        if (activeIdx >= 0 && items[activeIdx]) {
-          items[activeIdx].click();
-        } else if (!search.value.trim()) {
-          window.location.href = homeUrl;
-        } else if (items.length === 1) {
-          items[0].click();
-        }
+        if (activeIdx >= 0 && items[activeIdx]) items[activeIdx].click();
+        else if (!search.value.trim()) window.location.href = homeUrl;
+        else if (items.length === 1) items[0].click();
       }
-      else if (e.key === 'Tab' && !e.shiftKey) {
-        e.preventDefault();
-        activeIdx = Math.min(activeIdx + 1, items.length - 1);
-        updateActive();
-      }
+      else if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
     }
   };
 })();
@@ -484,17 +781,18 @@ initPanel('edpb', edpbData, () => '#');
   const el = document.getElementById('panel-nyheter');
   const list = el.querySelector('.panel-list');
   let activeIdx = -1;
+
   function updateActive() {
     list.querySelectorAll('.panel-item').forEach((el, i) => {
       el.classList.toggle('kb-active', i === activeIdx);
       if (i === activeIdx) el.scrollIntoView({ block: 'nearest' });
     });
   }
+
   panels['nyheter'] = {
     el,
     open() {
-      closeAll();
-      el.classList.add('open');
+      closeAll(); el.classList.add('open');
       document.getElementById('overlay').classList.add('open');
       document.querySelector('[data-panel="nyheter"].panel-trigger')?.classList.add('active');
     },
@@ -507,13 +805,16 @@ initPanel('edpb', edpbData, () => '#');
     keydown(e) {
       if (!el.classList.contains('open')) return;
       const items = list.querySelectorAll('.panel-item');
-      if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); updateActive(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, -1); updateActive(); }
+      if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx-1, -1); updateActive(); }
       else if (e.key === 'Enter' && activeIdx >= 0 && items[activeIdx]) { e.preventDefault(); items[activeIdx].click(); }
     }
   };
 })();
 
+/* ================================================================
+   Global event wiring
+   ================================================================ */
 document.querySelectorAll('.panel-trigger').forEach(btn => {
   btn.addEventListener('click', () => {
     const id = btn.dataset.panel;
@@ -526,6 +827,7 @@ document.querySelectorAll('.panel-close').forEach(btn => {
 });
 
 document.getElementById('overlay').addEventListener('click', closeAll);
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeAll();
   const anyOpen = Object.values(panels).some(p => p.el.classList.contains('open'));
