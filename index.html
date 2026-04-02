@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hjem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Azeret Mono', monospace;
+    background: #1e293b;
+    color: #94a3b8;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { text-align: right; font-size: 1.6rem; font-weight: 300; line-height: 2; }
+  .page > a {
+    display: block; width: fit-content; margin-left: auto;
+    color: inherit; text-decoration: none; position: relative;
+    padding: 0.05em 0.3em; margin-right: -0.3em; transition: color 0.3s ease;
+  }
+  .page > a::before {
+    content: ''; position: absolute; inset: 0; background: #f59e0b;
+    transform: scaleX(0); transform-origin: right;
+    transition: transform 0.35s cubic-bezier(0.25,0.1,0.25,1); z-index: -1;
+  }
+  .page > a:hover { color: #1e293b; }
+  .page > a:hover::before { transform: scaleX(1); }
+
+  .panel-trigger {
+    display: block; width: fit-content; margin-left: auto;
+    color: inherit; text-decoration: none; position: relative;
+    padding: 0.05em 0.3em; margin-right: -0.3em; transition: color 0.3s ease;
+    cursor: pointer; background: none; border: none; font: inherit; text-align: right;
+  }
+  .panel-trigger::before {
+    content: ''; position: absolute; inset: 0; background: #f59e0b;
+    transform: scaleX(0); transform-origin: right;
+    transition: transform 0.35s cubic-bezier(0.25,0.1,0.25,1); z-index: -1;
+  }
+  .panel-trigger:hover, .panel-trigger.active { color: #1e293b; }
+  .panel-trigger:hover::before, .panel-trigger.active::before { transform: scaleX(1); }
+
+  .hotkey {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.75em; font-weight: 400; width: 1.6em; height: 1.6em;
+    border-radius: 3px; margin-left: 0.5em; vertical-align: middle;
+    transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease, opacity 0.3s ease;
+  }
+  a:hover .hotkey, .panel-trigger:hover .hotkey, .panel-trigger.active .hotkey {
+    color: #1e293b; border-color: #1e293b; border-style: dashed;
+  }
+  .keys-ghost .hotkey { color: #f59e0b; border: 1px dashed #475569; }
+
+  .panel {
+    position: fixed; top: 0; width: 520px; height: 100vh;
+    background: #0f172a; transition: transform 0.4s cubic-bezier(0.25,0.1,0.25,1);
+    z-index: 100; display: flex; flex-direction: column;
+  }
+  .panel.from-right { right: 0; border-left: 1px solid #334155; transform: translateX(100%); }
+  .panel.from-left { left: 0; border-right: 1px solid #334155; transform: translateX(-100%); }
+  .panel.open { transform: translateX(0); }
+
+  .panel-header { padding: 1.5rem 1.5rem 0; flex-shrink: 0; }
+  .panel-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .panel-title { font-size: 1.1rem; font-weight: 400; color: #f59e0b; letter-spacing: 0.05em; }
+  .panel-close {
+    background: none; border: none; color: #64748b; font-family: inherit;
+    font-size: 1rem; cursor: pointer; padding: 0.2em 0.4em; transition: color 0.2s ease;
+  }
+  .panel-close:hover { color: #f59e0b; }
+
+  .panel-tabs { display: flex; gap: 0; margin-bottom: 1rem; }
+  .panel-tab {
+    flex: 1; padding: 0.5em 0; background: none; border: 1px solid #334155;
+    color: #64748b; font: inherit; font-size: 0.95rem; font-weight: 400;
+    cursor: pointer; transition: all 0.25s ease; letter-spacing: 0.03em;
+  }
+  .panel-tab:first-child { border-radius: 3px 0 0 3px; }
+  .panel-tab:last-child { border-radius: 0 3px 3px 0; border-left: none; }
+  .panel-tab.active { background: #f59e0b; border-color: #f59e0b; color: #0f172a; }
+
+  .panel-search {
+    width: 100%; padding: 0.6em 0.8em; background: #1e293b;
+    border: 1px solid #334155; border-radius: 3px; color: #e2e8f0;
+    font: inherit; font-size: 0.95rem; font-weight: 300; outline: none;
+    transition: border-color 0.2s ease; margin-bottom: 0.5rem;
+  }
+  .panel-search::placeholder { color: #475569; }
+  .panel-search:focus { border-color: #f59e0b; }
+
+  .panel-list {
+    flex: 1; overflow-y: auto; padding: 0.5rem 1.5rem 1.5rem;
+    scrollbar-width: thin; scrollbar-color: #334155 transparent;
+  }
+  .panel-list::-webkit-scrollbar { width: 4px; }
+  .panel-list::-webkit-scrollbar-track { background: transparent; }
+  .panel-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+
+  .panel-item {
+    display: flex; align-items: baseline; gap: 0.8em;
+    padding: 0.55em 0.3em; text-decoration: none; color: #cbd5e1;
+    font-size: 1.15rem; font-weight: 300; border-bottom: 1px solid #1e293b;
+    transition: color 0.2s ease, background 0.2s ease;
+  }
+  .panel-item:hover, .panel-item.kb-active { color: #1e293b; background: #f59e0b; }
+  .panel-item .num { flex-shrink: 0; width: 6em; text-align: right; font-weight: 500; color: #f59e0b; }
+  .panel-item:hover .num, .panel-item.kb-active .num { color: #1e293b; }
+  .panel-item .title { flex: 1; line-height: 1.5; }
+  .panel-empty { color: #475569; font-size: 0.9rem; font-weight: 300; padding: 1em 0.3em; font-style: italic; }
+
+  .overlay {
+    position: fixed; inset: 0; background: rgba(15,23,42,0.5);
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 99;
+  }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+
+  .panel-hint {
+    color: #475569; font-size: 0.8rem; font-weight: 300; padding: 0 0.3em;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .page { font-size: 1.3rem; }
+    .panel { width: 100%; }
+    body { padding: 2rem 1.5rem; }
+  }
+</style>
+</head>
+<body class="keys-ghost">
+
+  <div class="page">
+    <button class="panel-trigger" data-panel="gdpr" data-key="1">GDPR<span class="hotkey">1</span></button>
+    <button class="panel-trigger" data-panel="edpb" data-key="2">EDPB Guidelines<span class="hotkey">2</span></button>
+    <a href="https://min.rettsdata.no/" data-key="3">Rettsdata<span class="hotkey">3</span></a>
+    <button class="panel-trigger" data-panel="lovdata" data-key="4">Lovdata Pro<span class="hotkey">4</span></button>
+    <button class="panel-trigger" data-panel="datatilsynet" data-key="5">Datatilsynet<span class="hotkey">5</span></button>
+    <a href="https://www.jus.no" data-key="6">Jus.no<span class="hotkey">6</span></a>
+    <a href="https://isikt.sharepoint.com/sites/Innsikt" data-key="7">Innsikt<span class="hotkey">7</span></a>
+    <a href="Countdown.html" data-key="8">Timer<span class="hotkey">8</span></a>
+    <a href="https://booking.webgate.no/" data-key="9">Berg-Hansen<span class="hotkey">9</span></a>
+    <button class="panel-trigger" data-panel="nyheter" data-key="0">Nyheter<span class="hotkey">0</span></button>
+    <a href="https://www.claude.ai" data-key="+">Claude<span class="hotkey">+</span></a>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+
+  <!-- GDPR panel -->
+  <div class="panel from-right" id="panel-gdpr">
+    <div class="panel-header">
+      <div class="panel-top">
+        <span class="panel-title">GDPR</span>
+        <button class="panel-close" data-panel="gdpr">esc</button>
+      </div>
+      <div class="panel-tabs" data-panel="gdpr">
+        <button class="panel-tab active" data-tab="art">Art. 1–99</button>
+        <button class="panel-tab" data-tab="rec">Rec. 1–173</button>
+      </div>
+      <input type="text" class="panel-search" data-panel="gdpr" placeholder="Søk nummer eller tittel...">
+    </div>
+    <div class="panel-list" data-panel="gdpr"></div>
+  </div>
+
+  <!-- EDPB panel -->
+  <div class="panel from-left" id="panel-edpb">
+    <div class="panel-header">
+      <div class="panel-top">
+        <span class="panel-title">EDPB</span>
+        <button class="panel-close" data-panel="edpb">esc</button>
+      </div>
+      <div class="panel-tabs" data-panel="edpb">
+        <button class="panel-tab active" data-tab="gl">Guidelines</button>
+        <button class="panel-tab" data-tab="recs">Recommendations</button>
+      </div>
+      <input type="text" class="panel-search" data-panel="edpb" placeholder="Søk nummer eller emne...">
+    </div>
+    <div class="panel-list" data-panel="edpb"></div>
+  </div>
+
+  <!-- Lovdata Pro panel -->
+  <div class="panel from-right" id="panel-lovdata">
+    <div class="panel-header">
+      <div class="panel-top">
+        <span class="panel-title">Lovdata Pro</span>
+        <button class="panel-close" data-panel="lovdata">esc</button>
+      </div>
+      <input type="text" class="panel-search" data-panel="lovdata" placeholder="Søk lov eller forskrift...">
+      <div class="panel-hint">Enter uten søk → Lovdata Pro forside</div>
+    </div>
+    <div class="panel-list" data-panel="lovdata"></div>
+  </div>
+
+  <!-- Datatilsynet panel -->
+  <div class="panel from-left" id="panel-datatilsynet">
+    <div class="panel-header">
+      <div class="panel-top">
+        <span class="panel-title">Datatilsynet</span>
+        <button class="panel-close" data-panel="datatilsynet">esc</button>
+      </div>
+      <input type="text" class="panel-search" data-panel="datatilsynet" placeholder="Søk veileder, tema eller artikkel...">
+      <div class="panel-hint">Enter uten søk → datatilsynet.no</div>
+    </div>
+    <div class="panel-list" data-panel="datatilsynet"></div>
+  </div>
+
+  <!-- Nyheter panel -->
+  <div class="panel from-right" id="panel-nyheter">
+    <div class="panel-header">
+      <div class="panel-top">
+        <span class="panel-title">Nyheter</span>
+        <button class="panel-close" data-panel="nyheter">esc</button>
+      </div>
+    </div>
+    <div class="panel-list" data-panel="nyheter">
+      <a class="panel-item" href="https://www.digi.no"><span class="title">digi.no</span></a>
+      <a class="panel-item" href="https://www.khrono.no"><span class="title">Khrono</span></a>
+      <a class="panel-item" href="https://www.cw.no"><span class="title">Computerworld</span></a>
+      <a class="panel-item" href="https://www.rett24.no"><span class="title">Rett24</span></a>
+    </div>
+  </div>
+
+<!-- Data loaded from separate file -->
+<script src="GDPRdata.js"></script>
+
+<script>
+const panels = {};
+
+function initPanel(id, data, urlFn, prefixMap) {
+  const el = document.getElementById('panel-' + id);
+  const search = el.querySelector('.panel-search');
+  const list = el.querySelector('.panel-list');
+  const tabs = el.querySelectorAll('.panel-tab');
+  const keys = Object.keys(data);
+  let currentTab = keys[0];
+  let activeIdx = -1;
+
+  const roman = {1:'i',2:'ii',3:'iii',4:'iv',5:'v',6:'vi',7:'vii',8:'viii',9:'ix',10:'x',11:'xi'};
+
+  function render() {
+    const raw = search.value.toLowerCase().trim();
+    const q = raw.replace('chapter', 'ch.').replace('article', 'art.').replace('recital', 'rec.');
+    const prefix = prefixMap && prefixMap[currentTab] || '';
+    const items = data[currentTab].filter(item => {
+      const label = typeof item[0] === 'number' && prefix ? `${prefix} ${item[0]}` : String(item[0]);
+      let searchable = label.toLowerCase() + ' ' + item[1].toLowerCase();
+      if (String(item[0]).startsWith('Ch.')) {
+        const n = parseInt(String(item[0]).replace('Ch. ', ''));
+        if (roman[n]) searchable += ' chapter ' + roman[n] + ' ch. ' + roman[n];
+      }
+      return searchable.includes(q);
+    });
+    if (!items.length) { list.innerHTML = '<div class="panel-empty">Ingen treff</div>'; return; }
+    list.innerHTML = items.map(item => {
+      const url = item[2] || urlFn(currentTab, item[0]);
+      const label = typeof item[0] === 'number' && prefix ? `${prefix} ${item[0]}` : item[0];
+      return `<a class="panel-item" href="${url}"><span class="num">${label}</span><span class="title">${item[1]}</span></a>`;
+    }).join('');
+  }
+
+  function updateActive() {
+    const items = list.querySelectorAll('.panel-item');
+    items.forEach((el, i) => {
+      el.classList.toggle('kb-active', i === activeIdx);
+      if (i === activeIdx) el.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  tabs.forEach(tab => tab.addEventListener('click', () => {
+    currentTab = tab.dataset.tab;
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
+    search.value = ''; activeIdx = -1; render(); list.scrollTop = 0; search.focus();
+  }));
+
+  search.addEventListener('input', () => { render(); activeIdx = -1; });
+
+  panels[id] = {
+    el, search, list, render, open() {
+      closeAll();
+      el.classList.add('open');
+      document.getElementById('overlay').classList.add('open');
+      document.querySelector(`[data-panel="${id}"].panel-trigger`)?.classList.add('active');
+      render();
+      setTimeout(() => search.focus(), 300);
+    },
+    close() {
+      el.classList.remove('open');
+      document.getElementById('overlay').classList.remove('open');
+      document.querySelector(`[data-panel="${id}"].panel-trigger`)?.classList.remove('active');
+      search.value = ''; activeIdx = -1;
+    },
+    keydown(e) {
+      if (!el.classList.contains('open')) return;
+      const items = list.querySelectorAll('.panel-item');
+      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx-1, -1); updateActive(); if (activeIdx===-1) search.focus(); }
+      else if (e.key === 'Enter' && activeIdx >= 0 && items[activeIdx]) { e.preventDefault(); items[activeIdx].click(); }
+      else if (e.key === 'Tab' && !e.shiftKey) {
+        e.preventDefault();
+        activeIdx = Math.min(activeIdx + 1, items.length - 1);
+        updateActive();
+      }
+      else if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !search.value && keys.length > 1) {
+        e.preventDefault();
+        const i = keys.indexOf(currentTab);
+        const dir = e.key === 'ArrowRight' ? 1 : keys.length - 1;
+        currentTab = keys[(i + dir) % keys.length];
+        tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
+        activeIdx = -1; render(); list.scrollTop = 0; search.focus();
+      }
+    }
+  };
+}
+
+function closeAll() { Object.values(panels).forEach(p => p.close()); }
+
+initPanel('gdpr', gdprData, (tab, n) => `https://gdpr.fan/${tab === 'art' ? 'a' : 'r'}${n}`, { art: 'Art.', rec: 'Rec.' });
+initPanel('edpb', edpbData, () => '#');
+
+// --- Lovdata Pro panel ---
+(function() {
+  const el = document.getElementById('panel-lovdata');
+  const search = el.querySelector('.panel-search');
+  const list = el.querySelector('.panel-list');
+  const homeUrl = 'https://lovdata.no/pro/#myPage';
+  let activeIdx = -1;
+
+  function findLov(q) {
+    if (!q) return lovdataLookup;
+    return lovdataLookup.filter(entry =>
+      entry.tags.some(tag => tag.includes(q)) ||
+      entry.title.toLowerCase().includes(q)
+    );
+  }
+
+  function render() {
+    const q = search.value.toLowerCase().trim();
+    const results = findLov(q);
+    if (!results.length) {
+      list.innerHTML = '<div class="panel-empty">Ingen treff</div>';
+      return;
+    }
+    list.innerHTML = results.map(entry => {
+      const url = `https://lovdata.no/pro/#document/${entry.id}`;
+      const type = entry.id.startsWith('SF/') ? 'Forskrift' : entry.id.startsWith('PROP/') ? 'Forarbeid' : 'Lov';
+      return `<a class="panel-item" href="${url}"><span class="num">${type}</span><span class="title">${entry.title}</span></a>`;
+    }).join('');
+  }
+
+  function updateActive() {
+    list.querySelectorAll('.panel-item').forEach((el, i) => {
+      el.classList.toggle('kb-active', i === activeIdx);
+      if (i === activeIdx) el.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  search.addEventListener('input', () => { render(); activeIdx = -1; });
+
+  panels['lovdata'] = {
+    el, search, list, render,
+    open() {
+      closeAll();
+      el.classList.add('open');
+      document.getElementById('overlay').classList.add('open');
+      document.querySelector('[data-panel="lovdata"].panel-trigger')?.classList.add('active');
+      render();
+      setTimeout(() => search.focus(), 300);
+    },
+    close() {
+      el.classList.remove('open');
+      document.getElementById('overlay').classList.remove('open');
+      document.querySelector('[data-panel="lovdata"].panel-trigger')?.classList.remove('active');
+      search.value = ''; activeIdx = -1;
+    },
+    keydown(e) {
+      if (!el.classList.contains('open')) return;
+      const items = list.querySelectorAll('.panel-item');
+      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); updateActive(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, -1); updateActive(); if (activeIdx === -1) search.focus(); }
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeIdx >= 0 && items[activeIdx]) {
+          items[activeIdx].click();
+        } else if (!search.value.trim()) {
+          window.location.href = homeUrl;
+        } else if (items.length === 1) {
+          items[0].click();
+        }
+      }
+      else if (e.key === 'Tab' && !e.shiftKey) {
+        e.preventDefault();
+        activeIdx = Math.min(activeIdx + 1, items.length - 1);
+        updateActive();
+      }
+    }
+  };
+})();
+
+// --- Datatilsynet panel ---
+(function() {
+  const el = document.getElementById('panel-datatilsynet');
+  const search = el.querySelector('.panel-search');
+  const list = el.querySelector('.panel-list');
+  const homeUrl = 'https://www.datatilsynet.no/';
+  let activeIdx = -1;
+
+  function findDT(q) {
+    if (!q) return datatilsynetData;
+    return datatilsynetData.filter(entry =>
+      entry.tags.some(tag => tag.includes(q)) ||
+      entry.title.toLowerCase().includes(q)
+    );
+  }
+
+  function render() {
+    const q = search.value.toLowerCase().trim();
+    const results = findDT(q);
+    if (!results.length) {
+      list.innerHTML = '<div class="panel-empty">Ingen treff</div>';
+      return;
+    }
+    list.innerHTML = results.map(entry =>
+      `<a class="panel-item" href="${entry.url}"><span class="title">${entry.title}</span></a>`
+    ).join('');
+  }
+
+  function updateActive() {
+    list.querySelectorAll('.panel-item').forEach((el, i) => {
+      el.classList.toggle('kb-active', i === activeIdx);
+      if (i === activeIdx) el.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  search.addEventListener('input', () => { render(); activeIdx = -1; });
+
+  panels['datatilsynet'] = {
+    el, search, list, render,
+    open() {
+      closeAll();
+      el.classList.add('open');
+      document.getElementById('overlay').classList.add('open');
+      document.querySelector('[data-panel="datatilsynet"].panel-trigger')?.classList.add('active');
+      render();
+      setTimeout(() => search.focus(), 300);
+    },
+    close() {
+      el.classList.remove('open');
+      document.getElementById('overlay').classList.remove('open');
+      document.querySelector('[data-panel="datatilsynet"].panel-trigger')?.classList.remove('active');
+      search.value = ''; activeIdx = -1;
+    },
+    keydown(e) {
+      if (!el.classList.contains('open')) return;
+      const items = list.querySelectorAll('.panel-item');
+      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); updateActive(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, -1); updateActive(); if (activeIdx === -1) search.focus(); }
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeIdx >= 0 && items[activeIdx]) {
+          items[activeIdx].click();
+        } else if (!search.value.trim()) {
+          window.location.href = homeUrl;
+        } else if (items.length === 1) {
+          items[0].click();
+        }
+      }
+      else if (e.key === 'Tab' && !e.shiftKey) {
+        e.preventDefault();
+        activeIdx = Math.min(activeIdx + 1, items.length - 1);
+        updateActive();
+      }
+    }
+  };
+})();
+
+// --- Nyheter panel ---
+(function() {
+  const el = document.getElementById('panel-nyheter');
+  const list = el.querySelector('.panel-list');
+  let activeIdx = -1;
+  function updateActive() {
+    list.querySelectorAll('.panel-item').forEach((el, i) => {
+      el.classList.toggle('kb-active', i === activeIdx);
+      if (i === activeIdx) el.scrollIntoView({ block: 'nearest' });
+    });
+  }
+  panels['nyheter'] = {
+    el,
+    open() {
+      closeAll();
+      el.classList.add('open');
+      document.getElementById('overlay').classList.add('open');
+      document.querySelector('[data-panel="nyheter"].panel-trigger')?.classList.add('active');
+    },
+    close() {
+      el.classList.remove('open');
+      document.getElementById('overlay').classList.remove('open');
+      document.querySelector('[data-panel="nyheter"].panel-trigger')?.classList.remove('active');
+      activeIdx = -1;
+    },
+    keydown(e) {
+      if (!el.classList.contains('open')) return;
+      const items = list.querySelectorAll('.panel-item');
+      if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); updateActive(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, -1); updateActive(); }
+      else if (e.key === 'Enter' && activeIdx >= 0 && items[activeIdx]) { e.preventDefault(); items[activeIdx].click(); }
+    }
+  };
+})();
+
+document.querySelectorAll('.panel-trigger').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.panel;
+    panels[id].el.classList.contains('open') ? panels[id].close() : panels[id].open();
+  });
+});
+
+document.querySelectorAll('.panel-close').forEach(btn => {
+  btn.addEventListener('click', () => panels[btn.dataset.panel].close());
+});
+
+document.getElementById('overlay').addEventListener('click', closeAll);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeAll();
+  const anyOpen = Object.values(panels).some(p => p.el.classList.contains('open'));
+  if (anyOpen) {
+    Object.values(panels).forEach(p => p.keydown(e));
+    return;
+  }
+  if ((e.key >= '0' && e.key <= '9') || e.key === '+') {
+    const target = document.querySelector(`[data-key="${e.key}"]`);
+    if (target) target.click();
+  }
+});
+</script>
+</body>
+</html>
