@@ -451,6 +451,17 @@ function initGdprPanel() {
   let detailNr = null;
   let detailType = null;
 
+  function normalizeQuery(q) {
+    return q
+      .replace(/\bartikkel\b/g, 'art.')
+      .replace(/\bartikel\b/g, 'art.')
+      .replace(/\barticle\b/g, 'art.')
+      .replace(/\bfortalepunkt\b/g, 'rec.')
+      .replace(/\brecital\b/g, 'rec.')
+      .replace(/\bkapittel\b/g, 'kap.')
+      .replace(/\bchapter\b/g, 'kap.');
+  }
+
   const artMap = {};
   gdpr.articles.forEach(a => { artMap[a.nr] = a; });
   const recMap = {};
@@ -510,14 +521,15 @@ function initGdprPanel() {
   }
 
   function renderArticles() {
-    const q = search.value.toLowerCase().trim();
+    const raw = search.value.toLowerCase().trim();
+    const q = normalizeQuery(raw);
     let html = '', any = false;
 
     for (const ch of gdpr.chapters) {
       const matches = gdpr.articles.filter(a => a.ch === ch.nr).filter(a => {
         if (!q) return true;
         if ((`art. ${a.nr} ${a.no}`).toLowerCase().includes(q)) return true;
-        return a.text.toLowerCase().includes(q);
+        return a.text.toLowerCase().includes(raw);
       });
       if (!matches.length) continue;
       any = true;
@@ -525,7 +537,7 @@ function initGdprPanel() {
 
       for (const a of matches) {
         const titleHit = !q || (`art. ${a.nr} ${a.no}`).toLowerCase().includes(q);
-        const snip = !titleHit && q ? `<span class="search-snippet">${snippet(a.text, q)}</span>` : '';
+        const snip = !titleHit && raw ? `<span class="search-snippet">${snippet(a.text, raw)}</span>` : '';
         html += `<a class="panel-item" href="#" data-detail="art" data-nr="${a.nr}"><span class="num">Art. ${a.nr}</span><span class="title">${esc(a.no)}${snip}</span></a>`;
       }
     }
@@ -534,17 +546,18 @@ function initGdprPanel() {
   }
 
   function renderRecitals() {
-    const q = search.value.toLowerCase().trim();
+    const raw = search.value.toLowerCase().trim();
+    const q = normalizeQuery(raw);
     let html = '', any = false;
 
     for (const r of gdpr.recitals) {
       const preview = truncate(r.no, 80);
       if (q) {
-        const inPreview = (`rec. ${r.nr} ` + preview.toLowerCase()).includes(q);
-        const inBody = r.no.toLowerCase().includes(q);
-        if (!inPreview && !inBody) continue;
+        const inLabel = (`rec. ${r.nr} ` + preview.toLowerCase()).includes(q);
+        const inBody = r.no.toLowerCase().includes(raw);
+        if (!inLabel && !inBody) continue;
         any = true;
-        const snip = !inPreview && inBody ? `<span class="search-snippet">${snippet(r.no, q)}</span>` : '';
+        const snip = !inLabel && inBody ? `<span class="search-snippet">${snippet(r.no, raw)}</span>` : '';
         html += `<a class="panel-item" href="#" data-detail="rec" data-nr="${r.nr}"><span class="num">Rec. ${r.nr}</span><span class="title"><span class="rec-preview">${esc(preview)}</span>${snip}</span></a>`;
       } else {
         any = true;
