@@ -132,7 +132,7 @@ VED AI-ASSISTERT REDIGERING
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hjem – Solarized</title>
+<title>Hjem</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@300;400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,400&display=swap" rel="stylesheet">
@@ -243,7 +243,7 @@ VED AI-ASSISTERT REDIGERING
   }
   @keyframes blink { 50% { opacity: 0; } }
 
-  /* ── SECTION: CSS_PANELS ── */
+/* ── SECTION: CSS_PANELS ── */
   .panel {
     position: fixed; top: 0; width: 520px; height: 100vh;
     background: var(--bg-panel);
@@ -273,7 +273,7 @@ VED AI-ASSISTERT REDIGERING
   .panel-tabs { display: flex; gap: 0; margin-bottom: 1rem; }
   .panel-tab {
     flex: 1; padding: 0.45em 0; background: none; border: 1px solid var(--border);
-    color: var(--text-mid); font: inherit; font-size: 0.85rem; font-weight: 400;
+    color: var(--text-mid); font: inherit; font-size: 0.9rem; font-weight: 400;
     cursor: pointer; transition: all 0.15s ease; letter-spacing: 0.02em;
     text-transform: lowercase;
   }
@@ -284,7 +284,7 @@ VED AI-ASSISTERT REDIGERING
   .panel-search {
     width: 100%; padding: 0.55em 0.8em; background: var(--bg-input);
     border: 1px solid var(--border); border-radius: 3px; color: var(--text);
-    font: inherit; font-size: 0.85rem; font-weight: 400; outline: none;
+    font: inherit; font-size: 0.9rem; font-weight: 400; outline: none;
     transition: border-color 0.15s ease; margin-bottom: 0.5rem;
   }
   .panel-search::placeholder { color: var(--text-dim); }
@@ -301,7 +301,7 @@ VED AI-ASSISTERT REDIGERING
   .panel-item {
     display: flex; align-items: baseline; gap: 0.7em;
     padding: 0.4em 0.4em; text-decoration: none; color: var(--text);
-    font-size: 0.9rem; font-weight: 400;
+    font-size: 0.95rem; font-weight: 400;
     border-bottom: 1px solid var(--border-lt);
     border-radius: 2px;
     transition: background-color 0.06s ease;
@@ -309,12 +309,12 @@ VED AI-ASSISTERT REDIGERING
   .panel-item:hover, .panel-item.kb-active { background: var(--hover-bg); }
   .panel-item .num {
     flex-shrink: 0; width: 6.5em; text-align: right; font-weight: 500;
-    color: var(--accent); font-size: 0.8rem;
+    color: var(--accent); font-size: 0.85rem;
   }
   .panel-item .title {
     flex: 1; line-height: 1.5;
     font-family: 'Azeret Mono', monospace; font-weight: 400;
-    font-size: 0.85rem; color: var(--text-mid);
+    font-size: 0.9rem; color: var(--text-mid);
   }
   .panel-item:hover .title, .panel-item.kb-active .title { color: var(--text); }
   .panel-empty { color: var(--text-dim); font-size: 0.85rem; font-weight: 400; padding: 1em 0.3em; font-style: italic; }
@@ -430,7 +430,7 @@ VED AI-ASSISTERT REDIGERING
 </head>
 <body>
 
-  <!-- ── SECTION: HTML_MENU ── -->
+<!-- ── SECTION: HTML_MENU ── -->
   <div class="page">
     <a href="https://booking.webgate.no/" data-key="b"><span class="hk">b</span>erg-hansen <span class="ind ind-tool">.book</span></a>
     <a href="https://www.claude.ai" data-key="c"><span class="hk">c</span>laude <span class="ind ind-tool">.run</span></a>
@@ -447,6 +447,7 @@ VED AI-ASSISTERT REDIGERING
     <a href="https://min.rettsdata.no/" data-key="r"><span class="hk">r</span>ettsdata <span class="ind ind-link">.ref</span></a>
     <a href="spotify://" data-key="s"><span class="hk">s</span>potify <span class="ind ind-app">.ogg</span></a>
     <a href="msteams://" data-key="t"><span class="hk">t</span>eams <span class="ind ind-app">.app</span></a>
+    <a href="todoist://" data-key="o">t<span class="hk">o</span>doist <span class="ind ind-app">.app</span></a>
     <a href="ms-word:nft|u|" data-key="w"><span class="hk">w</span>ord <span class="ind ind-app">.app</span></a>
     <div class="cursor-line">~<span class="cursor"></span></div>
   </div>
@@ -535,7 +536,7 @@ VED AI-ASSISTERT REDIGERING
 <script>
 /* ── SECTION: JS_GLOBALS ── */
 const panels={};
-const hotkeys='gerldjinbyctsxwp'.split('');
+const hotkeys='gerldjinbyctsxwpo'.split('');
 
 function closeAll(){Object.values(panels).forEach(p=>p.close())}
 
