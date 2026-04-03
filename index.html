@@ -407,6 +407,18 @@ function closeAll(){Object.values(panels).forEach(p=>p.close())}
 (function(){
   const el=document.getElementById('panel-gdpr'),header=el.querySelector('.panel-header'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list'),tabBtns=el.querySelectorAll('.panel-tab');
   let currentTab='art',activeIdx=-1,detailMode=false,detailNr=null,detailType=null;
+
+  function normalizeQuery(q) {
+    return q
+      .replace(/\bartikkel\b/g, 'art.')
+      .replace(/\bartikel\b/g, 'art.')
+      .replace(/\barticle\b/g, 'art.')
+      .replace(/\bfortalepunkt\b/g, 'rec.')
+      .replace(/\brecital\b/g, 'rec.')
+      .replace(/\bkapittel\b/g, 'kap.')
+      .replace(/\bchapter\b/g, 'kap.');
+  }
+
   const artMap={},recMap={},chMap={};
   gdpr.articles.forEach(a=>artMap[a.nr]=a);gdpr.recitals.forEach(r=>recMap[r.nr]=r);gdpr.chapters.forEach(c=>chMap[c.nr]=c);
   const artNrs=gdpr.articles.map(a=>a.nr).sort((a,b)=>a-b),recNrs=gdpr.recitals.map(r=>r.nr).sort((a,b)=>a-b);
@@ -415,8 +427,48 @@ function closeAll(){Object.values(panels).forEach(p=>p.close())}
   function truncate(t,l){const c=t.replace(/\n+/g,' ');return c.length<=l?c:c.slice(0,l).replace(/\s+\S*$/,'')+' …'}
   function snippet(t,q,l){l=l||90;const i=t.toLowerCase().indexOf(q.toLowerCase());if(i===-1)return'';const a=Math.max(0,i-Math.floor(l/2)),b=Math.min(t.length,i+q.length+Math.floor(l/2));let s=(a>0?'… ':'')+t.slice(a,b)+(b<t.length?' …':'');const re=new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi');return esc(s).replace(re,'<mark>$1</mark>')}
   function renderList(){activeIdx=-1;currentTab==='art'?renderArticles():renderRecitals()}
-  function renderArticles(){const q=search.value.toLowerCase().trim();let html='',any=false;for(const ch of gdpr.chapters){const matches=gdpr.articles.filter(a=>a.ch===ch.nr).filter(a=>{if(!q)return true;if((`art. ${a.nr} ${a.no}`).toLowerCase().includes(q))return true;return a.text.toLowerCase().includes(q)});if(!matches.length)continue;any=true;html+=`<div class="chapter-divider"><span class="num">kap. ${ch.nr}</span><span class="title">${esc(ch.no).toLowerCase()}</span></div>`;for(const a of matches){const titleHit=!q||(`art. ${a.nr} ${a.no}`).toLowerCase().includes(q);const snip=!titleHit&&q?`<span class="search-snippet">${snippet(a.text,q)}</span>`:'';html+=`<a class="panel-item" href="#" data-detail="art" data-nr="${a.nr}"><span class="num">art. ${a.nr}</span><span class="title">${esc(a.no).toLowerCase()}${snip}</span></a>`}}list.innerHTML=any?html:'<div class="panel-empty">ingen treff</div>';bindClicks()}
-  function renderRecitals(){const q=search.value.toLowerCase().trim();let html='',any=false;for(const r of gdpr.recitals){const preview=truncate(r.no,80);if(q){const inLabel=(`rec. ${r.nr} `+preview.toLowerCase()).includes(q),inBody=r.no.toLowerCase().includes(q);if(!inLabel&&!inBody)continue;any=true;const snip=!inLabel&&inBody?`<span class="search-snippet">${snippet(r.no,q)}</span>`:'';html+=`<a class="panel-item" href="#" data-detail="rec" data-nr="${r.nr}"><span class="num">rec. ${r.nr}</span><span class="title"><span class="rec-preview">${esc(preview).toLowerCase()}</span>${snip}</span></a>`}else{any=true;html+=`<a class="panel-item" href="#" data-detail="rec" data-nr="${r.nr}"><span class="num">rec. ${r.nr}</span><span class="title"><span class="rec-preview">${esc(preview).toLowerCase()}</span></span></a>`}}list.innerHTML=any?html:'<div class="panel-empty">ingen treff</div>';bindClicks()}
+
+  function renderArticles(){
+    const raw = search.value.toLowerCase().trim();
+    const q = normalizeQuery(raw);
+    let html='',any=false;
+    for(const ch of gdpr.chapters){
+      const matches=gdpr.articles.filter(a=>a.ch===ch.nr).filter(a=>{
+        if(!q)return true;
+        if((`art. ${a.nr} ${a.no}`).toLowerCase().includes(q))return true;
+        return raw && a.text.toLowerCase().includes(raw);
+      });
+      if(!matches.length)continue;any=true;
+      html+=`<div class="chapter-divider"><span class="num">kap. ${ch.nr}</span><span class="title">${esc(ch.no).toLowerCase()}</span></div>`;
+      for(const a of matches){
+        const titleHit=!q||(`art. ${a.nr} ${a.no}`).toLowerCase().includes(q);
+        const snip=!titleHit&&raw?`<span class="search-snippet">${snippet(a.text,raw)}</span>`:'';
+        html+=`<a class="panel-item" href="#" data-detail="art" data-nr="${a.nr}"><span class="num">art. ${a.nr}</span><span class="title">${esc(a.no).toLowerCase()}${snip}</span></a>`;
+      }
+    }
+    list.innerHTML=any?html:'<div class="panel-empty">ingen treff</div>';bindClicks();
+  }
+
+  function renderRecitals(){
+    const raw = search.value.toLowerCase().trim();
+    const q = normalizeQuery(raw);
+    let html='',any=false;
+    for(const r of gdpr.recitals){
+      const preview=truncate(r.no,80);
+      if(q){
+        const inLabel=(`rec. ${r.nr} `+preview.toLowerCase()).includes(q);
+        const inBody=raw && r.no.toLowerCase().includes(raw);
+        if(!inLabel&&!inBody)continue;any=true;
+        const snip=!inLabel&&inBody?`<span class="search-snippet">${snippet(r.no,raw)}</span>`:'';
+        html+=`<a class="panel-item" href="#" data-detail="rec" data-nr="${r.nr}"><span class="num">rec. ${r.nr}</span><span class="title"><span class="rec-preview">${esc(preview).toLowerCase()}</span>${snip}</span></a>`;
+      }else{
+        any=true;
+        html+=`<a class="panel-item" href="#" data-detail="rec" data-nr="${r.nr}"><span class="num">rec. ${r.nr}</span><span class="title"><span class="rec-preview">${esc(preview).toLowerCase()}</span></span></a>`;
+      }
+    }
+    list.innerHTML=any?html:'<div class="panel-empty">ingen treff</div>';bindClicks();
+  }
+
   function bindClicks(){list.querySelectorAll('[data-detail]').forEach(el=>{el.addEventListener('click',e=>{e.preventDefault();showDetail(el.dataset.detail,parseInt(el.dataset.nr))})})}
   function showDetail(type,nr){detailMode=true;detailType=type;detailNr=nr;header.querySelectorAll('.panel-tabs,.panel-search').forEach(e=>e.style.display='none');el.classList.add('detail-open');type==='art'?renderArtDetail(nr):renderRecDetail(nr)}
   function renderArtDetail(nr){const a=artMap[nr];if(!a)return;const ch=chMap[a.ch],idx=artNrs.indexOf(nr),prev=idx>0?artNrs[idx-1]:null,next=idx<artNrs.length-1?artNrs[idx+1]:null;list.innerHTML=`<div class="detail-nav"><button class="detail-back">← tilbake</button><span></span></div>${ch?`<div class="detail-meta">kap. ${ch.nr} — ${esc(ch.no).toLowerCase()}</div>`:''}<div class="detail-title">Art. ${nr} — ${esc(a.no)}</div><div class="detail-body">${formatText(a.text)}</div><div class="detail-footer">${prev!=null?`<button class="detail-prev" data-nr="${prev}">← art. ${prev}</button>`:'<span></span>'}${next!=null?`<button class="detail-next" data-nr="${next}">art. ${next} →</button>`:'<span></span>'}</div>`;list.scrollTop=0;bindNav('art')}
