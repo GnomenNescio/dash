@@ -3,30 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hjem</title>
+<title>Hjem – Solarized</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@300;400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,400&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* ── Palette ──────────────────────────────────────────────── */
   :root {
-    --bg:       #f8f4ef;
-    --bg-panel: #ede8e0;
-    --bg-input: #faf7f3;
-    --text:     #3d3632;
-    --text-mid: #8a7d74;
-    --text-dim: #b0a69c;
-    --border:   #d6ccc2;
-    --border-lt:#e8e0d8;
-    --menu:     #3a7d7d;
+    --base03:  #002b36;
+    --base02:  #073642;
+    --base01:  #586e75;
+    --base00:  #657b83;
+    --base0:   #839496;
+    --base1:   #93a1a1;
+    --base2:   #eee8d5;
+    --base3:   #fdf6e3;
+    --yellow:  #b58900;
+    --orange:  #cb4b16;
+    --red:     #dc322f;
+    --magenta: #d33682;
+    --violet:  #6c71c4;
+    --blue:    #268bd2;
+    --cyan:    #2aa198;
+    --green:   #859900;
+
+    --bg:       var(--base3);
+    --bg-panel: var(--base2);
+    --bg-input: var(--base3);
+    --text:     var(--base01);
+    --text-mid: var(--base00);
+    --text-dim: var(--base1);
+    --border:   #c9c1ad;
+    --border-lt:var(--base2);
+    --accent:   var(--cyan);
+    --hover-bg: rgba(0,0,0,0.04);
   }
-  #panel-gdpr        { --accent: #b45a3c; }
-  #panel-edpb        { --accent: #4a6a8a; }
-  #panel-lovdata     { --accent: #6b7c3f; }
-  #panel-datatilsynet{ --accent: #7d6078; }
-  #panel-nyheter     { --accent: #b8860b; }
 
   body {
     font-family: 'Azeret Mono', monospace;
@@ -40,47 +52,67 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ── Hovedmeny ────────────────────────────────────────────── */
-  .page { text-align: right; font-size: 1.6rem; font-weight: 300; line-height: 2; }
-  .page > a {
-    display: block; width: fit-content; margin-left: auto;
-    color: inherit; text-decoration: none; position: relative;
-    padding: 0.05em 0.3em; margin-right: -0.3em; transition: color 0.3s ease;
-  }
-  .page > a::before {
-    content: ''; position: absolute; inset: 0; background: var(--menu);
-    transform: scaleX(0); transform-origin: right;
-    transition: transform 0.35s cubic-bezier(0.25,0.1,0.25,1); z-index: -1;
-  }
-  .page > a:hover { color: var(--bg); }
-  .page > a:hover::before { transform: scaleX(1); }
+  .page { text-align: right; font-size: 1.1rem; font-weight: 400; line-height: 2.1; }
 
+  .page > a,
   .panel-trigger {
     display: block; width: fit-content; margin-left: auto;
-    color: inherit; text-decoration: none; position: relative;
-    padding: 0.05em 0.3em; margin-right: -0.3em; transition: color 0.3s ease;
-    cursor: pointer; background: none; border: none; font: inherit; text-align: right;
+    color: var(--text-mid); text-decoration: none; position: relative;
+    padding: 1px 6px; margin-right: -6px;
+    border-radius: 3px;
+    cursor: pointer; background: none; border: none;
+    font: inherit; text-align: right; text-transform: lowercase;
+    transition: color 0.08s ease, background-color 0.08s ease;
   }
-  .panel-trigger::before {
-    content: ''; position: absolute; inset: 0; background: var(--menu);
-    transform: scaleX(0); transform-origin: right;
-    transition: transform 0.35s cubic-bezier(0.25,0.1,0.25,1); z-index: -1;
-  }
-  .panel-trigger:hover, .panel-trigger.active { color: var(--bg); }
-  .panel-trigger:hover::before, .panel-trigger.active::before { transform: scaleX(1); }
+  .page > a:hover,
+  .panel-trigger:hover { color: var(--text); background: var(--hover-bg); }
+  .panel-trigger.active { color: var(--accent); }
 
-  .hotkey {
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 0.75em; font-weight: 400; width: 1.6em; height: 1.6em;
-    border-radius: 3px; margin-left: 0.5em; vertical-align: middle;
-    transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease, opacity 0.3s ease;
-  }
-  a:hover .hotkey, .panel-trigger:hover .hotkey, .panel-trigger.active .hotkey {
-    color: var(--bg); border-color: var(--bg); border-style: dashed;
-  }
-  .keys-ghost .hotkey { color: var(--menu); border: 1px dashed var(--border); }
+  .page > a:hover .hk,
+  .panel-trigger:hover .hk { color: var(--accent); }
+  .panel-trigger.active .hk { color: var(--accent); }
 
-  /* ── Panel – felles ───────────────────────────────────────── */
+  .hk {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    text-decoration-color: var(--base1);
+    transition: color 0.08s ease, text-decoration-color 0.08s ease;
+  }
+  .page > a:hover .hk,
+  .panel-trigger:hover .hk,
+  .panel-trigger.active .hk {
+    text-decoration-color: var(--accent);
+  }
+
+  .ind {
+    display: inline-block;
+    width: 3.5em;
+    text-align: left;
+    margin-left: 0.4em;
+    letter-spacing: 0.02em;
+    font-weight: 400;
+    transition: color 0.08s ease;
+  }
+  .ind-panel { color: var(--cyan); }
+  .ind-list  { color: var(--violet); }
+  .ind-link  { color: var(--blue); }
+  .ind-tool  { color: var(--green); }
+  .ind-port  { color: var(--yellow); }
+  .ind-app   { color: var(--orange); }
+
+  .cursor-line {
+    text-align: right; padding-right: 6px; margin-top: 4px;
+    color: var(--text-dim); font-size: 1.1rem;
+  }
+  .cursor {
+    display: inline-block; width: 0.55em; height: 1.1em;
+    background: var(--accent); vertical-align: text-bottom;
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ── Panel ────────────────────────────────────────────────── */
   .panel {
     position: fixed; top: 0; width: 520px; height: 100vh;
     background: var(--bg-panel);
@@ -95,28 +127,34 @@
 
   .panel-header { padding: 1.5rem 1.5rem 0; flex-shrink: 0; transition: background-color 0.5s ease; }
   .panel-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-  .panel-title { font-size: 1.1rem; font-weight: 400; color: var(--accent); letter-spacing: 0.05em; }
-  .panel-close {
-    background: none; border: none; color: var(--text-dim); font-family: inherit;
-    font-size: 1rem; cursor: pointer; padding: 0.2em 0.4em; transition: color 0.2s ease;
+  .panel-title {
+    font-size: 0.9rem; font-weight: 400; color: var(--accent);
+    letter-spacing: 0.05em; text-transform: lowercase;
   }
-  .panel-close:hover { color: var(--accent); }
+  .panel-close {
+    background: none; border: none; color: var(--text-dim);
+    font-family: inherit; font-size: 0.85rem; cursor: pointer;
+    padding: 0.2em 0.4em; border-radius: 3px;
+    transition: color 0.08s ease, background-color 0.08s ease;
+  }
+  .panel-close:hover { color: var(--text); background: var(--hover-bg); }
 
   .panel-tabs { display: flex; gap: 0; margin-bottom: 1rem; }
   .panel-tab {
-    flex: 1; padding: 0.5em 0; background: none; border: 1px solid var(--border);
-    color: var(--text-mid); font: inherit; font-size: 0.95rem; font-weight: 400;
-    cursor: pointer; transition: all 0.25s ease; letter-spacing: 0.03em;
+    flex: 1; padding: 0.45em 0; background: none; border: 1px solid var(--border);
+    color: var(--text-mid); font: inherit; font-size: 0.85rem; font-weight: 400;
+    cursor: pointer; transition: all 0.15s ease; letter-spacing: 0.02em;
+    text-transform: lowercase;
   }
   .panel-tab:first-child { border-radius: 3px 0 0 3px; }
   .panel-tab:last-child  { border-radius: 0 3px 3px 0; border-left: none; }
-  .panel-tab.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .panel-tab.active { background: var(--accent); border-color: var(--accent); color: var(--base3); }
 
   .panel-search {
-    width: 100%; padding: 0.6em 0.8em; background: var(--bg-input);
+    width: 100%; padding: 0.55em 0.8em; background: var(--bg-input);
     border: 1px solid var(--border); border-radius: 3px; color: var(--text);
-    font: inherit; font-size: 0.95rem; font-weight: 300; outline: none;
-    transition: border-color 0.2s ease; margin-bottom: 0.5rem;
+    font: inherit; font-size: 0.85rem; font-weight: 400; outline: none;
+    transition: border-color 0.15s ease; margin-bottom: 0.5rem;
   }
   .panel-search::placeholder { color: var(--text-dim); }
   .panel-search:focus { border-color: var(--accent); }
@@ -130,90 +168,90 @@
   .panel-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
   .panel-item {
-    display: flex; align-items: baseline; gap: 0.8em;
-    padding: 0.55em 0.3em; text-decoration: none; color: var(--text);
-    font-size: 1.15rem; font-weight: 300; border-bottom: 1px solid var(--border-lt);
-    transition: color 0.2s ease, background 0.2s ease;
+    display: flex; align-items: baseline; gap: 0.7em;
+    padding: 0.4em 0.4em; text-decoration: none; color: var(--text);
+    font-size: 0.9rem; font-weight: 400;
+    border-bottom: 1px solid var(--border-lt);
+    border-radius: 2px;
+    transition: background-color 0.06s ease;
   }
-  .panel-item:hover, .panel-item.kb-active { color: var(--bg); background: var(--accent); }
+  .panel-item:hover, .panel-item.kb-active { background: var(--hover-bg); }
   .panel-item .num {
-    flex-shrink: 0; width: 6em; text-align: right; font-weight: 500;
-    color: var(--accent); font-family: 'Azeret Mono', monospace;
+    flex-shrink: 0; width: 6.5em; text-align: right; font-weight: 500;
+    color: var(--accent); font-size: 0.8rem;
   }
-  .panel-item:hover .num, .panel-item.kb-active .num { color: var(--bg); }
-  .panel-item .title { flex: 1; line-height: 1.5; font-family: 'Source Serif 4', serif; font-weight: 400; }
-  .panel-empty { color: var(--text-dim); font-size: 0.9rem; font-weight: 300; padding: 1em 0.3em; font-style: italic; }
+  .panel-item .title {
+    flex: 1; line-height: 1.5;
+    font-family: 'Azeret Mono', monospace; font-weight: 400;
+    font-size: 0.85rem; color: var(--text-mid);
+  }
+  .panel-item:hover .title, .panel-item.kb-active .title { color: var(--text); }
+  .panel-empty { color: var(--text-dim); font-size: 0.85rem; font-weight: 400; padding: 1em 0.3em; font-style: italic; }
 
   .overlay {
-    position: fixed; inset: 0; background: rgba(60,50,40,0.15);
+    position: fixed; inset: 0; background: rgba(0,43,54,0.08);
     opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 99;
   }
   .overlay.open { opacity: 1; pointer-events: auto; }
 
   .panel-hint {
-    color: var(--text-dim); font-size: 0.8rem; font-weight: 300; padding: 0 0.3em;
+    color: var(--text-dim); font-size: 0.75rem; font-weight: 300; padding: 0 0.3em;
     margin-bottom: 0.5rem;
   }
 
-  /* ── GDPR lesemodus ───────────────────────────────────────── */
+  /* ── Detail / lesemodus ───────────────────────────────────── */
   .panel.detail-open {
     width: 100vw; border-left: none; border-right: none; background: var(--bg);
   }
   .panel.detail-open .panel-header { background: var(--bg); }
-  .panel.detail-open .panel-title  { color: #b45a3c; }
-  .panel.detail-open .panel-close  { color: var(--text-mid); }
-  .panel.detail-open .panel-close:hover { color: #b45a3c; }
+  .panel.detail-open .panel-close:hover { color: var(--accent); }
   .panel.detail-open .panel-list {
-    max-width: none; padding: 2rem calc((100vw - 80ch) / 2) 4rem;
-    scrollbar-color: var(--border) transparent;
+    max-width: none; padding: 2rem calc((100vw - 68ch) / 2) 4rem;
   }
-  .panel.detail-open .panel-list::-webkit-scrollbar-thumb { background: var(--border); }
-  .panel.detail-open .detail-nav   { border-bottom-color: #e0d6cc; }
+  .panel.detail-open .detail-nav   { border-bottom-color: var(--border-lt); }
   .panel.detail-open .detail-back  { color: var(--text-mid); }
-  .panel.detail-open .detail-back:hover { color: #b45a3c; }
+  .panel.detail-open .detail-back:hover { color: var(--accent); }
   .panel.detail-open .rettsdata-link { color: var(--text-mid); }
-  .panel.detail-open .rettsdata-link:hover { color: #b45a3c; }
-  .panel.detail-open .detail-meta {
-    color: var(--text-mid); font-family: 'Azeret Mono', monospace;
-  }
+  .panel.detail-open .rettsdata-link:hover { color: var(--accent); }
+  .panel.detail-open .detail-meta { color: var(--text-mid); }
   .panel.detail-open .detail-title {
-    color: #b45a3c; font-family: 'Source Serif 4', serif;
-    font-size: 1.3rem; font-weight: 500;
+    color: var(--accent); font-family: 'Source Serif 4', serif;
+    font-size: 1.25rem; font-weight: 500;
   }
   .panel.detail-open .detail-body {
-    font-family: 'Source Serif 4', serif; font-size: 1.15rem;
-    font-weight: 400; line-height: 1.5; color: #2c2824;
+    font-family: 'Source Serif 4', serif; font-size: 1.08rem;
+    font-weight: 400; line-height: 1.7; color: var(--text);
   }
-  .panel.detail-open .detail-footer { border-top-color: #e0d6cc; }
+  .panel.detail-open .detail-footer { border-top-color: var(--border-lt); }
   .panel.detail-open .detail-prev,
   .panel.detail-open .detail-next  { color: var(--text-mid); }
   .panel.detail-open .detail-prev:hover,
-  .panel.detail-open .detail-next:hover { color: #b45a3c; }
+  .panel.detail-open .detail-next:hover { color: var(--accent); }
 
-  /* ── Detail view (fallback / listevisning) ────────────────── */
   .detail-nav {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border);
   }
   .detail-back {
     background: none; border: none; color: var(--text-mid); font: inherit;
-    font-size: 0.95rem; cursor: pointer; padding: 0.2em 0; transition: color 0.2s;
+    font-size: 0.85rem; cursor: pointer; padding: 0.2em 0; transition: color 0.08s;
   }
   .detail-back:hover { color: var(--accent); }
   .rettsdata-link {
-    color: var(--text-mid); font-size: 0.9rem; text-decoration: none; transition: color 0.2s;
+    color: var(--text-mid); font-size: 0.8rem; text-decoration: none;
+    transition: color 0.08s;
   }
   .rettsdata-link:hover { color: var(--accent); }
   .detail-meta {
-    color: var(--text-dim); font-size: 0.85rem; font-weight: 300; margin-bottom: 0.3rem;
+    color: var(--text-dim); font-size: 0.8rem; font-weight: 400; margin-bottom: 0.3rem;
   }
   .detail-title {
-    color: var(--accent); font-size: 1.15rem; font-weight: 400; line-height: 1.5;
-    margin-bottom: 1.5rem;
+    color: var(--accent); font-size: 1.05rem; font-weight: 500; line-height: 1.5;
+    margin-bottom: 1.5rem; font-family: 'Source Serif 4', serif;
   }
   .detail-body {
-    color: var(--text); font-size: 1.05rem; font-weight: 300; line-height: 1.85;
-    padding-bottom: 1.5rem;
+    color: var(--text); font-size: 1rem; font-weight: 400; line-height: 1.7;
+    padding-bottom: 1.5rem; font-family: 'Source Serif 4', serif;
   }
   .detail-body .art-para { margin-bottom: 1.2em; }
   .detail-body .art-points { padding-left: 1.6em; margin-bottom: 1.2em; }
@@ -224,62 +262,59 @@
   }
   .detail-prev, .detail-next {
     background: none; border: none; color: var(--text-mid); font: inherit;
-    font-size: 0.9rem; cursor: pointer; padding: 0.2em 0; transition: color 0.2s;
+    font-size: 0.8rem; cursor: pointer; padding: 0.2em 0; transition: color 0.08s;
   }
   .detail-prev:hover, .detail-next:hover { color: var(--accent); }
 
-  /* ── Søk-snippets & kapitteldeler ─────────────────────────── */
   .search-snippet {
-    display: block; font-size: 0.8rem; color: var(--text-dim); font-weight: 300;
+    display: block; font-size: 0.75rem; color: var(--text-dim); font-weight: 400;
     margin-top: 0.2em; line-height: 1.5;
   }
   .search-snippet mark {
-    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    background: rgba(42,161,152,0.12);
     color: var(--accent); border-radius: 2px; padding: 0 0.15em;
   }
-  .panel-item:hover .search-snippet,
-  .panel-item.kb-active .search-snippet { color: var(--bg); }
-  .panel-item:hover .search-snippet mark,
-  .panel-item.kb-active .search-snippet mark {
-    background: rgba(248,244,239,0.2); color: var(--bg);
-  }
   .chapter-divider {
-    display: flex; align-items: baseline; gap: 0.8em;
+    display: flex; align-items: baseline; gap: 0.7em;
     padding: 0.8em 0.3em 0.3em; color: var(--text-dim);
-    font-size: 0.85rem; font-weight: 400; letter-spacing: 0.03em;
+    font-size: 0.75rem; font-weight: 400; letter-spacing: 0.03em;
     border-bottom: none; pointer-events: none;
   }
-  .chapter-divider .num { flex-shrink: 0; width: 6em; text-align: right; color: var(--text-dim); font-family: 'Azeret Mono', monospace; }
-  .chapter-divider .title { flex: 1; font-family: 'Azeret Mono', monospace; }
+  .chapter-divider .num { flex-shrink: 0; width: 4.5em; text-align: right; color: var(--text-dim); }
+  .chapter-divider .title { flex: 1; }
   .rec-preview {
-    display: block; font-size: 0.8rem; color: var(--text-dim); font-weight: 300;
+    display: block; font-size: 0.75rem; color: var(--text-dim); font-weight: 400;
     margin-top: 0.15em; line-height: 1.4; white-space: nowrap;
     overflow: hidden; text-overflow: ellipsis;
   }
-  .panel-item:hover .rec-preview,
-  .panel-item.kb-active .rec-preview { color: rgba(248,244,239,0.7); }
 
   @media (max-width: 600px) {
-    .page { font-size: 1.3rem; }
+    .page { font-size: 0.95rem; }
     .panel { width: 100%; }
     body { padding: 2rem 1.5rem; }
   }
 </style>
 </head>
-<body class="keys-ghost">
+<body>
 
   <div class="page">
-    <button class="panel-trigger" data-panel="gdpr" data-key="1">GDPR<span class="hotkey">1</span></button>
-    <button class="panel-trigger" data-panel="edpb" data-key="2">EDPB Guidelines<span class="hotkey">2</span></button>
-    <a href="https://min.rettsdata.no/" data-key="3">Rettsdata<span class="hotkey">3</span></a>
-    <button class="panel-trigger" data-panel="lovdata" data-key="4">Lovdata Pro<span class="hotkey">4</span></button>
-    <button class="panel-trigger" data-panel="datatilsynet" data-key="5">Datatilsynet<span class="hotkey">5</span></button>
-    <a href="https://www.jus.no" data-key="6">Jus.no<span class="hotkey">6</span></a>
-    <a href="https://isikt.sharepoint.com/sites/Innsikt" data-key="7">Innsikt<span class="hotkey">7</span></a>
-    <a href="Countdown.html" data-key="8">Timer<span class="hotkey">8</span></a>
-    <a href="https://booking.webgate.no/" data-key="9">Berg-Hansen<span class="hotkey">9</span></a>
-    <button class="panel-trigger" data-panel="nyheter" data-key="0">Nyheter<span class="hotkey">0</span></button>
-    <a href="https://www.claude.ai" data-key="+">Claude<span class="hotkey">+</span></a>
+    <a href="https://booking.webgate.no/" data-key="b"><span class="hk">b</span>erg-hansen <span class="ind ind-tool">.book</span></a>
+    <a href="https://www.claude.ai" data-key="c"><span class="hk">c</span>laude <span class="ind ind-tool">.run</span></a>
+    <button class="panel-trigger" data-panel="datatilsynet" data-key="d"><span class="hk">d</span>atatilsynet <span class="ind ind-panel">.veil</span></button>
+    <button class="panel-trigger" data-panel="edpb" data-key="e"><span class="hk">e</span>dpb guidelines <span class="ind ind-panel">.veil</span></button>
+    <a href="ms-excel:nft|u|" data-key="x">e<span class="hk">x</span>cel <span class="ind ind-app">.app</span></a>
+    <button class="panel-trigger" data-panel="gdpr" data-key="g"><span class="hk">g</span>dpr <span class="ind ind-panel">.lov</span></button>
+    <a href="#" data-key="i"><span class="hk">i</span>nnsikt <span class="ind ind-port">.info</span></a>
+    <a href="https://www.jus.no" data-key="j"><span class="hk">j</span>us <span class="ind ind-link">.edu</span></a>
+    <button class="panel-trigger" data-panel="lovdata" data-key="l"><span class="hk">l</span>ovdata pro <span class="ind ind-panel">.nav</span></button>
+    <a href="#" data-key="n"><span class="hk">n</span>edtelling <span class="ind ind-tool">.run</span></a>
+    <button class="panel-trigger" data-panel="nyheter" data-key="y">n<span class="hk">y</span>heter <span class="ind ind-list">.feed</span></button>
+    <a href="ms-powerpoint:nft|u|" data-key="p"><span class="hk">p</span>owerpoint <span class="ind ind-app">.app</span></a>
+    <a href="https://min.rettsdata.no/" data-key="r"><span class="hk">r</span>ettsdata <span class="ind ind-link">.ref</span></a>
+    <a href="spotify://" data-key="s"><span class="hk">s</span>potify <span class="ind ind-app">.ogg</span></a>
+    <a href="msteams://" data-key="t"><span class="hk">t</span>eams <span class="ind ind-app">.app</span></a>
+    <a href="ms-word:nft|u|" data-key="w"><span class="hk">w</span>ord <span class="ind ind-app">.app</span></a>
+    <div class="cursor-line">~<span class="cursor"></span></div>
   </div>
 
   <div class="overlay" id="overlay"></div>
@@ -288,14 +323,14 @@
   <div class="panel from-right" id="panel-gdpr">
     <div class="panel-header">
       <div class="panel-top">
-        <span class="panel-title">GDPR</span>
+        <span class="panel-title">gdpr</span>
         <button class="panel-close" data-panel="gdpr">esc</button>
       </div>
       <div class="panel-tabs" data-panel="gdpr">
-        <button class="panel-tab active" data-tab="art">Art. 1–99</button>
-        <button class="panel-tab" data-tab="rec">Rec. 1–173</button>
+        <button class="panel-tab active" data-tab="art">art. 1–99</button>
+        <button class="panel-tab" data-tab="rec">rec. 1–173</button>
       </div>
-      <input type="text" class="panel-search" data-panel="gdpr" placeholder="Søk nummer, tittel eller innhold...">
+      <input type="text" class="panel-search" data-panel="gdpr" placeholder="søk nummer, tittel eller innhold...">
     </div>
     <div class="panel-list" data-panel="gdpr"></div>
   </div>
@@ -304,14 +339,14 @@
   <div class="panel from-left" id="panel-edpb">
     <div class="panel-header">
       <div class="panel-top">
-        <span class="panel-title">EDPB</span>
+        <span class="panel-title">edpb</span>
         <button class="panel-close" data-panel="edpb">esc</button>
       </div>
       <div class="panel-tabs" data-panel="edpb">
-        <button class="panel-tab active" data-tab="gl">Guidelines</button>
-        <button class="panel-tab" data-tab="recs">Recommendations</button>
+        <button class="panel-tab active" data-tab="gl">guidelines</button>
+        <button class="panel-tab" data-tab="recs">recommendations</button>
       </div>
-      <input type="text" class="panel-search" data-panel="edpb" placeholder="Søk nummer eller emne...">
+      <input type="text" class="panel-search" data-panel="edpb" placeholder="søk nummer eller emne...">
     </div>
     <div class="panel-list" data-panel="edpb"></div>
   </div>
@@ -320,11 +355,11 @@
   <div class="panel from-right" id="panel-lovdata">
     <div class="panel-header">
       <div class="panel-top">
-        <span class="panel-title">Lovdata Pro</span>
+        <span class="panel-title">lovdata pro</span>
         <button class="panel-close" data-panel="lovdata">esc</button>
       </div>
-      <input type="text" class="panel-search" data-panel="lovdata" placeholder="Søk lov eller forskrift...">
-      <div class="panel-hint">Enter uten søk → Lovdata Pro forside</div>
+      <input type="text" class="panel-search" data-panel="lovdata" placeholder="søk lov eller forskrift...">
+      <div class="panel-hint">enter uten søk → lovdata pro forside</div>
     </div>
     <div class="panel-list" data-panel="lovdata"></div>
   </div>
@@ -333,11 +368,11 @@
   <div class="panel from-left" id="panel-datatilsynet">
     <div class="panel-header">
       <div class="panel-top">
-        <span class="panel-title">Datatilsynet</span>
+        <span class="panel-title">datatilsynet</span>
         <button class="panel-close" data-panel="datatilsynet">esc</button>
       </div>
-      <input type="text" class="panel-search" data-panel="datatilsynet" placeholder="Søk veileder, tema eller artikkel...">
-      <div class="panel-hint">Enter uten søk → datatilsynet.no</div>
+      <input type="text" class="panel-search" data-panel="datatilsynet" placeholder="søk veileder, tema eller artikkel...">
+      <div class="panel-hint">enter uten søk → datatilsynet.no</div>
     </div>
     <div class="panel-list" data-panel="datatilsynet"></div>
   </div>
@@ -346,15 +381,15 @@
   <div class="panel from-right" id="panel-nyheter">
     <div class="panel-header">
       <div class="panel-top">
-        <span class="panel-title">Nyheter</span>
+        <span class="panel-title">nyheter</span>
         <button class="panel-close" data-panel="nyheter">esc</button>
       </div>
     </div>
     <div class="panel-list" data-panel="nyheter">
       <a class="panel-item" href="https://www.digi.no"><span class="title">digi.no</span></a>
-      <a class="panel-item" href="https://www.khrono.no"><span class="title">Khrono</span></a>
-      <a class="panel-item" href="https://www.cw.no"><span class="title">Computerworld</span></a>
-      <a class="panel-item" href="https://www.rett24.no"><span class="title">Rett24</span></a>
+      <a class="panel-item" href="https://www.khrono.no"><span class="title">khrono</span></a>
+      <a class="panel-item" href="https://www.cw.no"><span class="title">computerworld</span></a>
+      <a class="panel-item" href="https://www.rett24.no"><span class="title">rett24</span></a>
     </div>
   </div>
 
@@ -363,543 +398,84 @@
 <script src="gdpr.js"></script>
 
 <script>
-const panels = {};
+const panels={};
+const hotkeys='gerldjinbyctsxwp'.split('');
 
-function initPanel(id, data, urlFn, prefixMap) {
-  const el = document.getElementById('panel-' + id);
-  const search = el.querySelector('.panel-search');
-  const list = el.querySelector('.panel-list');
-  const tabs = el.querySelectorAll('.panel-tab');
-  const keys = Object.keys(data);
-  let currentTab = keys[0];
-  let activeIdx = -1;
+function closeAll(){Object.values(panels).forEach(p=>p.close())}
 
-  function render() {
-    const q = search.value.toLowerCase().trim();
-    const prefix = prefixMap && prefixMap[currentTab] || '';
-    const items = data[currentTab].filter(item => {
-      const label = typeof item[0] === 'number' && prefix ? `${prefix} ${item[0]}` : String(item[0]);
-      return (label.toLowerCase() + ' ' + item[1].toLowerCase()).includes(q);
-    });
-    if (!items.length) { list.innerHTML = '<div class="panel-empty">Ingen treff</div>'; return; }
-    list.innerHTML = items.map(item => {
-      const url = item[2] || urlFn(currentTab, item[0]);
-      const label = typeof item[0] === 'number' && prefix ? `${prefix} ${item[0]}` : item[0];
-      return `<a class="panel-item" href="${url}"><span class="num">${label}</span><span class="title">${item[1]}</span></a>`;
-    }).join('');
-  }
-
-  function updateActive() {
-    list.querySelectorAll('.panel-item').forEach((el, i) => {
-      el.classList.toggle('kb-active', i === activeIdx);
-      if (i === activeIdx) el.scrollIntoView({ block: 'nearest' });
-    });
-  }
-
-  tabs.forEach(tab => tab.addEventListener('click', () => {
-    currentTab = tab.dataset.tab;
-    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
-    search.value = ''; activeIdx = -1; render(); list.scrollTop = 0; search.focus();
-  }));
-
-  search.addEventListener('input', () => { render(); activeIdx = -1; });
-
-  panels[id] = {
-    el, search, list, render, open() {
-      closeAll();
-      el.classList.add('open');
-      document.getElementById('overlay').classList.add('open');
-      document.querySelector(`[data-panel="${id}"].panel-trigger`)?.classList.add('active');
-      render();
-      setTimeout(() => search.focus(), 300);
-    },
-    close() {
-      el.classList.remove('open');
-      document.getElementById('overlay').classList.remove('open');
-      document.querySelector(`[data-panel="${id}"].panel-trigger`)?.classList.remove('active');
-      search.value = ''; activeIdx = -1;
-    },
-    keydown(e) {
-      if (!el.classList.contains('open')) return;
-      const items = list.querySelectorAll('.panel-item');
-      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx-1, -1); updateActive(); if (activeIdx===-1) search.focus(); }
-      else if (e.key === 'Enter' && activeIdx >= 0 && items[activeIdx]) { e.preventDefault(); items[activeIdx].click(); }
-      else if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
-      else if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !search.value && keys.length > 1) {
-        e.preventDefault();
-        const i = keys.indexOf(currentTab);
-        const dir = e.key === 'ArrowRight' ? 1 : keys.length - 1;
-        currentTab = keys[(i + dir) % keys.length];
-        tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
-        activeIdx = -1; render(); list.scrollTop = 0; search.focus();
-      }
-    }
-  };
-}
-
-function initGdprPanel() {
-  const el = document.getElementById('panel-gdpr');
-  const header = el.querySelector('.panel-header');
-  const search = el.querySelector('.panel-search');
-  const list = el.querySelector('.panel-list');
-  const tabBtns = el.querySelectorAll('.panel-tab');
-
-  let currentTab = 'art';
-  let activeIdx = -1;
-  let detailMode = false;
-  let detailNr = null;
-  let detailType = null;
-
-  function normalizeQuery(q) {
-    return q
-      .replace(/\bartikkel\b/g, 'art.')
-      .replace(/\bartikel\b/g, 'art.')
-      .replace(/\barticle\b/g, 'art.')
-      .replace(/\bfortalepunkt\b/g, 'rec.')
-      .replace(/\brecital\b/g, 'rec.')
-      .replace(/\bkapittel\b/g, 'kap.')
-      .replace(/\bchapter\b/g, 'kap.');
-  }
-
-  const artMap = {};
-  gdpr.articles.forEach(a => { artMap[a.nr] = a; });
-  const recMap = {};
-  gdpr.recitals.forEach(r => { recMap[r.nr] = r; });
-  const chMap = {};
-  gdpr.chapters.forEach(c => { chMap[c.nr] = c; });
-
-  const artNrs = gdpr.articles.map(a => a.nr).sort((a, b) => a - b);
-  const recNrs = gdpr.recitals.map(r => r.nr).sort((a, b) => a - b);
-
-  function rettsdataUrl(nr) {
-    return `https://min.rettsdata.no/Dokument/gL20180615z2D38z2EGDPRz5FNOz2DART${nr}`;
-  }
-
-  function esc(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  function formatText(text) {
-    const blocks = text.split('\n\n');
-    let html = '';
-    for (const block of blocks) {
-      const t = block.trim();
-      if (!t) continue;
-      const lines = t.split('\n');
-      if (lines.some(l => /^[a-zæøå]\)\s/.test(l.trim()))) {
-        html += '<div class="art-points">';
-        for (const line of lines) html += `<p class="art-point">${esc(line.trim())}</p>`;
-        html += '</div>';
-      } else {
-        html += `<p class="art-para">${esc(t)}</p>`;
-      }
-    }
-    return html;
-  }
-
-  function truncate(text, len) {
-    const clean = text.replace(/\n+/g, ' ');
-    return clean.length <= len ? clean : clean.slice(0, len).replace(/\s+\S*$/, '') + ' …';
-  }
-
-  function snippet(text, q, len) {
-    len = len || 90;
-    const i = text.toLowerCase().indexOf(q.toLowerCase());
-    if (i === -1) return '';
-    const a = Math.max(0, i - Math.floor(len / 2));
-    const b = Math.min(text.length, i + q.length + Math.floor(len / 2));
-    let s = (a > 0 ? '… ' : '') + text.slice(a, b) + (b < text.length ? ' …' : '');
-    const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    s = esc(s).replace(re, '<mark>$1</mark>');
-    return s;
-  }
-
-  function renderList() {
-    activeIdx = -1;
-    currentTab === 'art' ? renderArticles() : renderRecitals();
-  }
-
-  function renderArticles() {
-    const raw = search.value.toLowerCase().trim();
-    const q = normalizeQuery(raw);
-    let html = '', any = false;
-
-    for (const ch of gdpr.chapters) {
-      const matches = gdpr.articles.filter(a => a.ch === ch.nr).filter(a => {
-        if (!q) return true;
-        if ((`art. ${a.nr} ${a.no}`).toLowerCase().includes(q)) return true;
-        return a.text.toLowerCase().includes(raw);
-      });
-      if (!matches.length) continue;
-      any = true;
-      html += `<div class="chapter-divider"><span class="num">Kap. ${ch.nr}</span><span class="title">${esc(ch.no)}</span></div>`;
-
-      for (const a of matches) {
-        const titleHit = !q || (`art. ${a.nr} ${a.no}`).toLowerCase().includes(q);
-        const snip = !titleHit && raw ? `<span class="search-snippet">${snippet(a.text, raw)}</span>` : '';
-        html += `<a class="panel-item" href="#" data-detail="art" data-nr="${a.nr}"><span class="num">Art. ${a.nr}</span><span class="title">${esc(a.no)}${snip}</span></a>`;
-      }
-    }
-    list.innerHTML = any ? html : '<div class="panel-empty">Ingen treff</div>';
-    bindClicks();
-  }
-
-  function renderRecitals() {
-    const raw = search.value.toLowerCase().trim();
-    const q = normalizeQuery(raw);
-    let html = '', any = false;
-
-    for (const r of gdpr.recitals) {
-      const preview = truncate(r.no, 80);
-      if (q) {
-        const inLabel = (`rec. ${r.nr} ` + preview.toLowerCase()).includes(q);
-        const inBody = r.no.toLowerCase().includes(raw);
-        if (!inLabel && !inBody) continue;
-        any = true;
-        const snip = !inLabel && inBody ? `<span class="search-snippet">${snippet(r.no, raw)}</span>` : '';
-        html += `<a class="panel-item" href="#" data-detail="rec" data-nr="${r.nr}"><span class="num">Rec. ${r.nr}</span><span class="title"><span class="rec-preview">${esc(preview)}</span>${snip}</span></a>`;
-      } else {
-        any = true;
-        html += `<a class="panel-item" href="#" data-detail="rec" data-nr="${r.nr}"><span class="num">Rec. ${r.nr}</span><span class="title"><span class="rec-preview">${esc(preview)}</span></span></a>`;
-      }
-    }
-    list.innerHTML = any ? html : '<div class="panel-empty">Ingen treff</div>';
-    bindClicks();
-  }
-
-  function bindClicks() {
-    list.querySelectorAll('[data-detail]').forEach(el => {
-      el.addEventListener('click', e => {
-        e.preventDefault();
-        showDetail(el.dataset.detail, parseInt(el.dataset.nr));
-      });
-    });
-  }
-
-  function showDetail(type, nr) {
-    detailMode = true;
-    detailType = type;
-    detailNr = nr;
-    header.querySelectorAll('.panel-tabs, .panel-search').forEach(e => e.style.display = 'none');
-    el.classList.add('detail-open');
-    type === 'art' ? renderArtDetail(nr) : renderRecDetail(nr);
-  }
-
-  function renderArtDetail(nr) {
-    const a = artMap[nr]; if (!a) return;
-    const ch = chMap[a.ch];
-    const idx = artNrs.indexOf(nr);
-    const prev = idx > 0 ? artNrs[idx - 1] : null;
-    const next = idx < artNrs.length - 1 ? artNrs[idx + 1] : null;
-
-    list.innerHTML = `
-      <div class="detail-nav">
-        <button class="detail-back">← Tilbake</button>
-        <a class="rettsdata-link" href="${rettsdataUrl(nr)}" target="_blank" rel="noopener">Rettsdata →</a>
-      </div>
-      ${ch ? `<div class="detail-meta">Kap. ${ch.nr} — ${esc(ch.no)}</div>` : ''}
-      <div class="detail-title">Art. ${nr} — ${esc(a.no)}</div>
-      <div class="detail-body">${formatText(a.text)}</div>
-      <div class="detail-footer">
-        ${prev != null ? `<button class="detail-prev" data-nr="${prev}">← Art. ${prev}</button>` : '<span></span>'}
-        ${next != null ? `<button class="detail-next" data-nr="${next}">Art. ${next} →</button>` : '<span></span>'}
-      </div>`;
-    list.scrollTop = 0;
-    bindNav('art');
-  }
-
-  function renderRecDetail(nr) {
-    const r = recMap[nr]; if (!r) return;
-    const idx = recNrs.indexOf(nr);
-    const prev = idx > 0 ? recNrs[idx - 1] : null;
-    const next = idx < recNrs.length - 1 ? recNrs[idx + 1] : null;
-    const body = r.no.split(/\n\n|\n/).filter(Boolean).map(p => `<p class="art-para">${esc(p.trim())}</p>`).join('');
-
-    list.innerHTML = `
-      <div class="detail-nav">
-        <button class="detail-back">← Tilbake</button>
-        <span></span>
-      </div>
-      <div class="detail-title">Fortalepunkt ${nr}</div>
-      <div class="detail-body">${body}</div>
-      <div class="detail-footer">
-        ${prev != null ? `<button class="detail-prev" data-nr="${prev}">← Rec. ${prev}</button>` : '<span></span>'}
-        ${next != null ? `<button class="detail-next" data-nr="${next}">Rec. ${next} →</button>` : '<span></span>'}
-      </div>`;
-    list.scrollTop = 0;
-    bindNav('rec');
-  }
-
-  function bindNav(type) {
-    list.querySelector('.detail-back').addEventListener('click', hideDetail);
-    const p = list.querySelector('.detail-prev');
-    const n = list.querySelector('.detail-next');
-    if (p) p.addEventListener('click', () => showDetail(type, parseInt(p.dataset.nr)));
-    if (n) n.addEventListener('click', () => showDetail(type, parseInt(n.dataset.nr)));
-  }
-
-  function hideDetail() {
-    detailMode = false; detailNr = null; detailType = null;
-    el.classList.remove('detail-open');
-    header.querySelectorAll('.panel-tabs, .panel-search').forEach(e => e.style.display = '');
-    renderList(); list.scrollTop = 0;
-    setTimeout(() => search.focus(), 50);
-  }
-
-  function updateActive() {
-    list.querySelectorAll('.panel-item').forEach((el, i) => {
-      el.classList.toggle('kb-active', i === activeIdx);
-      if (i === activeIdx) el.scrollIntoView({ block: 'nearest' });
-    });
-  }
-
-  tabBtns.forEach(tab => tab.addEventListener('click', () => {
-    currentTab = tab.dataset.tab;
-    tabBtns.forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
-    search.value = ''; renderList(); list.scrollTop = 0; search.focus();
-  }));
-
-  search.addEventListener('input', () => renderList());
-
-  panels['gdpr'] = {
-    el, search, list, render: renderList,
-    open() {
-      closeAll();
-      el.classList.add('open');
-      document.getElementById('overlay').classList.add('open');
-      document.querySelector('[data-panel="gdpr"].panel-trigger')?.classList.add('active');
-      if (detailMode) hideDetail();
-      renderList();
-      setTimeout(() => search.focus(), 300);
-    },
-    close() {
-      el.classList.remove('open');
-      document.getElementById('overlay').classList.remove('open');
-      document.querySelector('[data-panel="gdpr"].panel-trigger')?.classList.remove('active');
-      search.value = ''; activeIdx = -1;
-      if (detailMode) {
-        detailMode = false; detailNr = null; detailType = null;
-        el.classList.remove('detail-open');
-        header.querySelectorAll('.panel-tabs, .panel-search').forEach(e => e.style.display = '');
-      }
-    },
-    keydown(e) {
-      if (!el.classList.contains('open')) return;
-
-      if (detailMode) {
-        if (e.key === 'Escape') { e.preventDefault(); hideDetail(); return; }
-        if (e.key === 'ArrowLeft') { const p = list.querySelector('.detail-prev'); if (p) { e.preventDefault(); showDetail(detailType, parseInt(p.dataset.nr)); } return; }
-        if (e.key === 'ArrowRight') { const n = list.querySelector('.detail-next'); if (n) { e.preventDefault(); showDetail(detailType, parseInt(n.dataset.nr)); } return; }
-        return;
-      }
-
-      const items = list.querySelectorAll('.panel-item');
-      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx-1, -1); updateActive(); if (activeIdx===-1) search.focus(); }
-      else if (e.key === 'Enter' && activeIdx >= 0 && items[activeIdx]) { e.preventDefault(); items[activeIdx].click(); }
-      else if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
-      else if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !search.value) {
-        e.preventDefault();
-        const tabs = ['art','rec'];
-        currentTab = tabs[(tabs.indexOf(currentTab) + 1) % 2];
-        tabBtns.forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
-        renderList(); list.scrollTop = 0; search.focus();
-      }
-    }
-  };
-}
-
-function closeAll() { Object.values(panels).forEach(p => p.close()); }
-
-initGdprPanel();
-initPanel('edpb', edpbData, () => '#');
-
-(function() {
-  const el = document.getElementById('panel-lovdata');
-  const search = el.querySelector('.panel-search');
-  const list = el.querySelector('.panel-list');
-  const homeUrl = 'https://lovdata.no/pro/#myPage';
-  let activeIdx = -1;
-
-  function findLov(q) {
-    if (!q) return lovdataLookup;
-    return lovdataLookup.filter(entry =>
-      entry.tags.some(tag => tag.includes(q)) || entry.title.toLowerCase().includes(q)
-    );
-  }
-
-  function render() {
-    const q = search.value.toLowerCase().trim();
-    const results = findLov(q);
-    if (!results.length) { list.innerHTML = '<div class="panel-empty">Ingen treff</div>'; return; }
-    list.innerHTML = results.map(entry => {
-      const url = `https://lovdata.no/pro/#document/${entry.id}`;
-      const type = entry.id.startsWith('SF/') ? 'Forskrift' : entry.id.startsWith('PROP/') ? 'Forarbeid' : 'Lov';
-      return `<a class="panel-item" href="${url}"><span class="num">${type}</span><span class="title">${entry.title}</span></a>`;
-    }).join('');
-  }
-
-  function updateActive() {
-    list.querySelectorAll('.panel-item').forEach((el, i) => {
-      el.classList.toggle('kb-active', i === activeIdx);
-      if (i === activeIdx) el.scrollIntoView({ block: 'nearest' });
-    });
-  }
-
-  search.addEventListener('input', () => { render(); activeIdx = -1; });
-
-  panels['lovdata'] = {
-    el, search, list, render,
-    open() {
-      closeAll(); el.classList.add('open');
-      document.getElementById('overlay').classList.add('open');
-      document.querySelector('[data-panel="lovdata"].panel-trigger')?.classList.add('active');
-      render(); setTimeout(() => search.focus(), 300);
-    },
-    close() {
-      el.classList.remove('open');
-      document.getElementById('overlay').classList.remove('open');
-      document.querySelector('[data-panel="lovdata"].panel-trigger')?.classList.remove('active');
-      search.value = ''; activeIdx = -1;
-    },
-    keydown(e) {
-      if (!el.classList.contains('open')) return;
-      const items = list.querySelectorAll('.panel-item');
-      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx-1, -1); updateActive(); if (activeIdx===-1) search.focus(); }
-      else if (e.key === 'Enter') {
-        e.preventDefault();
-        if (activeIdx >= 0 && items[activeIdx]) items[activeIdx].click();
-        else if (!search.value.trim()) window.location.href = homeUrl;
-        else if (items.length === 1) items[0].click();
-      }
-      else if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
-    }
-  };
+/* ── GDPR panel ─────────────────────────────────────────────── */
+(function(){
+  const el=document.getElementById('panel-gdpr'),header=el.querySelector('.panel-header'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list'),tabBtns=el.querySelectorAll('.panel-tab');
+  let currentTab='art',activeIdx=-1,detailMode=false,detailNr=null,detailType=null;
+  const artMap={},recMap={},chMap={};
+  gdpr.articles.forEach(a=>artMap[a.nr]=a);gdpr.recitals.forEach(r=>recMap[r.nr]=r);gdpr.chapters.forEach(c=>chMap[c.nr]=c);
+  const artNrs=gdpr.articles.map(a=>a.nr).sort((a,b)=>a-b),recNrs=gdpr.recitals.map(r=>r.nr).sort((a,b)=>a-b);
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  function formatText(t){const blocks=t.split('\n\n');let h='';for(const block of blocks){const b=block.trim();if(!b)continue;const lines=b.split('\n');if(lines.some(l=>/^[a-zæøå]\)\s/.test(l.trim()))){h+='<div class="art-points">';for(const line of lines)h+=`<p class="art-point">${esc(line.trim())}</p>`;h+='</div>'}else{h+=`<p class="art-para">${esc(b)}</p>`}}return h}
+  function truncate(t,l){const c=t.replace(/\n+/g,' ');return c.length<=l?c:c.slice(0,l).replace(/\s+\S*$/,'')+' …'}
+  function snippet(t,q,l){l=l||90;const i=t.toLowerCase().indexOf(q.toLowerCase());if(i===-1)return'';const a=Math.max(0,i-Math.floor(l/2)),b=Math.min(t.length,i+q.length+Math.floor(l/2));let s=(a>0?'… ':'')+t.slice(a,b)+(b<t.length?' …':'');const re=new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi');return esc(s).replace(re,'<mark>$1</mark>')}
+  function renderList(){activeIdx=-1;currentTab==='art'?renderArticles():renderRecitals()}
+  function renderArticles(){const q=search.value.toLowerCase().trim();let html='',any=false;for(const ch of gdpr.chapters){const matches=gdpr.articles.filter(a=>a.ch===ch.nr).filter(a=>{if(!q)return true;if((`art. ${a.nr} ${a.no}`).toLowerCase().includes(q))return true;return a.text.toLowerCase().includes(q)});if(!matches.length)continue;any=true;html+=`<div class="chapter-divider"><span class="num">kap. ${ch.nr}</span><span class="title">${esc(ch.no).toLowerCase()}</span></div>`;for(const a of matches){const titleHit=!q||(`art. ${a.nr} ${a.no}`).toLowerCase().includes(q);const snip=!titleHit&&q?`<span class="search-snippet">${snippet(a.text,q)}</span>`:'';html+=`<a class="panel-item" href="#" data-detail="art" data-nr="${a.nr}"><span class="num">art. ${a.nr}</span><span class="title">${esc(a.no).toLowerCase()}${snip}</span></a>`}}list.innerHTML=any?html:'<div class="panel-empty">ingen treff</div>';bindClicks()}
+  function renderRecitals(){const q=search.value.toLowerCase().trim();let html='',any=false;for(const r of gdpr.recitals){const preview=truncate(r.no,80);if(q){const inLabel=(`rec. ${r.nr} `+preview.toLowerCase()).includes(q),inBody=r.no.toLowerCase().includes(q);if(!inLabel&&!inBody)continue;any=true;const snip=!inLabel&&inBody?`<span class="search-snippet">${snippet(r.no,q)}</span>`:'';html+=`<a class="panel-item" href="#" data-detail="rec" data-nr="${r.nr}"><span class="num">rec. ${r.nr}</span><span class="title"><span class="rec-preview">${esc(preview).toLowerCase()}</span>${snip}</span></a>`}else{any=true;html+=`<a class="panel-item" href="#" data-detail="rec" data-nr="${r.nr}"><span class="num">rec. ${r.nr}</span><span class="title"><span class="rec-preview">${esc(preview).toLowerCase()}</span></span></a>`}}list.innerHTML=any?html:'<div class="panel-empty">ingen treff</div>';bindClicks()}
+  function bindClicks(){list.querySelectorAll('[data-detail]').forEach(el=>{el.addEventListener('click',e=>{e.preventDefault();showDetail(el.dataset.detail,parseInt(el.dataset.nr))})})}
+  function showDetail(type,nr){detailMode=true;detailType=type;detailNr=nr;header.querySelectorAll('.panel-tabs,.panel-search').forEach(e=>e.style.display='none');el.classList.add('detail-open');type==='art'?renderArtDetail(nr):renderRecDetail(nr)}
+  function renderArtDetail(nr){const a=artMap[nr];if(!a)return;const ch=chMap[a.ch],idx=artNrs.indexOf(nr),prev=idx>0?artNrs[idx-1]:null,next=idx<artNrs.length-1?artNrs[idx+1]:null;list.innerHTML=`<div class="detail-nav"><button class="detail-back">← tilbake</button><span></span></div>${ch?`<div class="detail-meta">kap. ${ch.nr} — ${esc(ch.no).toLowerCase()}</div>`:''}<div class="detail-title">Art. ${nr} — ${esc(a.no)}</div><div class="detail-body">${formatText(a.text)}</div><div class="detail-footer">${prev!=null?`<button class="detail-prev" data-nr="${prev}">← art. ${prev}</button>`:'<span></span>'}${next!=null?`<button class="detail-next" data-nr="${next}">art. ${next} →</button>`:'<span></span>'}</div>`;list.scrollTop=0;bindNav('art')}
+  function renderRecDetail(nr){const r=recMap[nr];if(!r)return;const idx=recNrs.indexOf(nr),prev=idx>0?recNrs[idx-1]:null,next=idx<recNrs.length-1?recNrs[idx+1]:null;const body=r.no.split(/\n\n|\n/).filter(Boolean).map(p=>`<p class="art-para">${esc(p.trim())}</p>`).join('');list.innerHTML=`<div class="detail-nav"><button class="detail-back">← tilbake</button><span></span></div><div class="detail-title">Fortalepunkt ${nr}</div><div class="detail-body">${body}</div><div class="detail-footer">${prev!=null?`<button class="detail-prev" data-nr="${prev}">← rec. ${prev}</button>`:'<span></span>'}${next!=null?`<button class="detail-next" data-nr="${next}">rec. ${next} →</button>`:'<span></span>'}</div>`;list.scrollTop=0;bindNav('rec')}
+  function bindNav(type){list.querySelector('.detail-back').addEventListener('click',hideDetail);const p=list.querySelector('.detail-prev'),n=list.querySelector('.detail-next');if(p)p.addEventListener('click',()=>showDetail(type,parseInt(p.dataset.nr)));if(n)n.addEventListener('click',()=>showDetail(type,parseInt(n.dataset.nr)))}
+  function hideDetail(){detailMode=false;detailNr=null;detailType=null;el.classList.remove('detail-open');header.querySelectorAll('.panel-tabs,.panel-search').forEach(e=>e.style.display='');renderList();list.scrollTop=0;setTimeout(()=>search.focus(),50)}
+  function updateActive(){list.querySelectorAll('.panel-item').forEach((el,i)=>{el.classList.toggle('kb-active',i===activeIdx);if(i===activeIdx)el.scrollIntoView({block:'nearest'})})}
+  tabBtns.forEach(tab=>tab.addEventListener('click',()=>{currentTab=tab.dataset.tab;tabBtns.forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));search.value='';renderList();list.scrollTop=0;search.focus()}));
+  search.addEventListener('input',()=>renderList());
+  panels['gdpr']={el,search,list,render:renderList,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="gdpr"].panel-trigger')?.classList.add('active');if(detailMode)hideDetail();renderList();setTimeout(()=>search.focus(),300)},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="gdpr"].panel-trigger')?.classList.remove('active');search.value='';activeIdx=-1;if(detailMode){detailMode=false;detailNr=null;detailType=null;el.classList.remove('detail-open');header.querySelectorAll('.panel-tabs,.panel-search').forEach(e=>e.style.display='')}},keydown(e){if(!el.classList.contains('open'))return;if(detailMode){if(e.key==='Escape'){e.preventDefault();hideDetail();return}if(e.key==='ArrowLeft'){const p=list.querySelector('.detail-prev');if(p){e.preventDefault();showDetail(detailType,parseInt(p.dataset.nr))}return}if(e.key==='ArrowRight'){const n=list.querySelector('.detail-next');if(n){e.preventDefault();showDetail(detailType,parseInt(n.dataset.nr))}return}return}const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive();if(activeIdx===-1)search.focus()}else if(e.key==='Enter'&&activeIdx>=0&&items[activeIdx]){e.preventDefault();items[activeIdx].click()}else if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&!search.value){e.preventDefault();currentTab=currentTab==='art'?'rec':'art';tabBtns.forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));renderList();list.scrollTop=0;search.focus()}}};
 })();
 
-(function() {
-  const el = document.getElementById('panel-datatilsynet');
-  const search = el.querySelector('.panel-search');
-  const list = el.querySelector('.panel-list');
-  const homeUrl = 'https://www.datatilsynet.no/';
-  let activeIdx = -1;
-
-  function findDT(q) {
-    if (!q) return datatilsynetData;
-    return datatilsynetData.filter(entry =>
-      entry.tags.some(tag => tag.includes(q)) || entry.title.toLowerCase().includes(q)
-    );
-  }
-
-  function render() {
-    const q = search.value.toLowerCase().trim();
-    const results = findDT(q);
-    if (!results.length) { list.innerHTML = '<div class="panel-empty">Ingen treff</div>'; return; }
-    list.innerHTML = results.map(entry =>
-      `<a class="panel-item" href="${entry.url}"><span class="title">${entry.title}</span></a>`
-    ).join('');
-  }
-
-  function updateActive() {
-    list.querySelectorAll('.panel-item').forEach((el, i) => {
-      el.classList.toggle('kb-active', i === activeIdx);
-      if (i === activeIdx) el.scrollIntoView({ block: 'nearest' });
-    });
-  }
-
-  search.addEventListener('input', () => { render(); activeIdx = -1; });
-
-  panels['datatilsynet'] = {
-    el, search, list, render,
-    open() {
-      closeAll(); el.classList.add('open');
-      document.getElementById('overlay').classList.add('open');
-      document.querySelector('[data-panel="datatilsynet"].panel-trigger')?.classList.add('active');
-      render(); setTimeout(() => search.focus(), 300);
-    },
-    close() {
-      el.classList.remove('open');
-      document.getElementById('overlay').classList.remove('open');
-      document.querySelector('[data-panel="datatilsynet"].panel-trigger')?.classList.remove('active');
-      search.value = ''; activeIdx = -1;
-    },
-    keydown(e) {
-      if (!el.classList.contains('open')) return;
-      const items = list.querySelectorAll('.panel-item');
-      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx-1, -1); updateActive(); if (activeIdx===-1) search.focus(); }
-      else if (e.key === 'Enter') {
-        e.preventDefault();
-        if (activeIdx >= 0 && items[activeIdx]) items[activeIdx].click();
-        else if (!search.value.trim()) window.location.href = homeUrl;
-        else if (items.length === 1) items[0].click();
-      }
-      else if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
-    }
-  };
+/* ── EDPB panel ─────────────────────────────────────────────── */
+(function(){
+  const el=document.getElementById('panel-edpb'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list'),tabs=el.querySelectorAll('.panel-tab');
+  const data=edpbData,keys=Object.keys(data);let currentTab=keys[0],activeIdx=-1;
+  function render(){const q=search.value.toLowerCase().trim();const items=data[currentTab].filter(item=>(item[0]+' '+item[1]).toLowerCase().includes(q));if(!items.length){list.innerHTML='<div class="panel-empty">ingen treff</div>';return}list.innerHTML=items.map(item=>`<a class="panel-item" href="${item[2]}"><span class="num">${item[0]}</span><span class="title">${item[1].toLowerCase()}</span></a>`).join('')}
+  function updateActive(){list.querySelectorAll('.panel-item').forEach((el,i)=>{el.classList.toggle('kb-active',i===activeIdx);if(i===activeIdx)el.scrollIntoView({block:'nearest'})})}
+  tabs.forEach(tab=>tab.addEventListener('click',()=>{currentTab=tab.dataset.tab;tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));search.value='';activeIdx=-1;render();list.scrollTop=0;search.focus()}));
+  search.addEventListener('input',()=>{render();activeIdx=-1});
+  panels['edpb']={el,search,list,render,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="edpb"].panel-trigger')?.classList.add('active');render();setTimeout(()=>search.focus(),300)},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="edpb"].panel-trigger')?.classList.remove('active');search.value='';activeIdx=-1},keydown(e){if(!el.classList.contains('open'))return;const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive();if(activeIdx===-1)search.focus()}else if(e.key==='Enter'&&activeIdx>=0&&items[activeIdx]){e.preventDefault();items[activeIdx].click()}else if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&!search.value&&keys.length>1){e.preventDefault();const i=keys.indexOf(currentTab);currentTab=keys[(i+1)%keys.length];tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));activeIdx=-1;render();list.scrollTop=0;search.focus()}}};
 })();
 
-(function() {
-  const el = document.getElementById('panel-nyheter');
-  const list = el.querySelector('.panel-list');
-  let activeIdx = -1;
-
-  function updateActive() {
-    list.querySelectorAll('.panel-item').forEach((el, i) => {
-      el.classList.toggle('kb-active', i === activeIdx);
-      if (i === activeIdx) el.scrollIntoView({ block: 'nearest' });
-    });
-  }
-
-  panels['nyheter'] = {
-    el,
-    open() {
-      closeAll(); el.classList.add('open');
-      document.getElementById('overlay').classList.add('open');
-      document.querySelector('[data-panel="nyheter"].panel-trigger')?.classList.add('active');
-    },
-    close() {
-      el.classList.remove('open');
-      document.getElementById('overlay').classList.remove('open');
-      document.querySelector('[data-panel="nyheter"].panel-trigger')?.classList.remove('active');
-      activeIdx = -1;
-    },
-    keydown(e) {
-      if (!el.classList.contains('open')) return;
-      const items = list.querySelectorAll('.panel-item');
-      if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx-1, -1); updateActive(); }
-      else if (e.key === 'Enter' && activeIdx >= 0 && items[activeIdx]) { e.preventDefault(); items[activeIdx].click(); }
-    }
-  };
+/* ── Lovdata panel ──────────────────────────────────────────── */
+(function(){
+  const el=document.getElementById('panel-lovdata'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list');let activeIdx=-1;
+  function render(){const q=search.value.toLowerCase().trim();const results=q?lovdataLookup.filter(e=>e.tags.some(t=>t.includes(q))||e.title.toLowerCase().includes(q)):lovdataLookup;if(!results.length){list.innerHTML='<div class="panel-empty">ingen treff</div>';return}list.innerHTML=results.map(e=>{const type=e.id.startsWith('SF/')?'forskrift':'lov';return`<a class="panel-item" href="https://lovdata.no/pro/#document/${e.id}"><span class="num">${type}</span><span class="title">${e.title}</span></a>`}).join('')}
+  function updateActive(){list.querySelectorAll('.panel-item').forEach((el,i)=>{el.classList.toggle('kb-active',i===activeIdx);if(i===activeIdx)el.scrollIntoView({block:'nearest'})})}
+  search.addEventListener('input',()=>{render();activeIdx=-1});
+  panels['lovdata']={el,search,list,render,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="lovdata"].panel-trigger')?.classList.add('active');render();setTimeout(()=>search.focus(),300)},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="lovdata"].panel-trigger')?.classList.remove('active');search.value='';activeIdx=-1},keydown(e){if(!el.classList.contains('open'))return;const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive();if(activeIdx===-1)search.focus()}else if(e.key==='Enter'){e.preventDefault();if(activeIdx>=0&&items[activeIdx])items[activeIdx].click();else if(!search.value.trim())window.location.href='https://lovdata.no/pro/#myPage';else if(items.length===1)items[0].click()}else if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}}};
 })();
 
-document.querySelectorAll('.panel-trigger').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const id = btn.dataset.panel;
-    panels[id].el.classList.contains('open') ? panels[id].close() : panels[id].open();
-  });
-});
+/* ── Datatilsynet panel ─────────────────────────────────────── */
+(function(){
+  const el=document.getElementById('panel-datatilsynet'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list');let activeIdx=-1;
+  function render(){const q=search.value.toLowerCase().trim();const results=q?datatilsynetData.filter(e=>e.tags.some(t=>t.includes(q))||e.title.toLowerCase().includes(q)):datatilsynetData;if(!results.length){list.innerHTML='<div class="panel-empty">ingen treff</div>';return}list.innerHTML=results.map(e=>`<a class="panel-item" href="${e.url}"><span class="title">${e.title.toLowerCase()}</span></a>`).join('')}
+  function updateActive(){list.querySelectorAll('.panel-item').forEach((el,i)=>{el.classList.toggle('kb-active',i===activeIdx);if(i===activeIdx)el.scrollIntoView({block:'nearest'})})}
+  search.addEventListener('input',()=>{render();activeIdx=-1});
+  panels['datatilsynet']={el,search,list,render,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="datatilsynet"].panel-trigger')?.classList.add('active');render();setTimeout(()=>search.focus(),300)},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="datatilsynet"].panel-trigger')?.classList.remove('active');search.value='';activeIdx=-1},keydown(e){if(!el.classList.contains('open'))return;const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive();if(activeIdx===-1)search.focus()}else if(e.key==='Enter'){e.preventDefault();if(activeIdx>=0&&items[activeIdx])items[activeIdx].click();else if(!search.value.trim())window.location.href='https://www.datatilsynet.no/';else if(items.length===1)items[0].click()}else if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}}};
+})();
 
-document.querySelectorAll('.panel-close').forEach(btn => {
-  btn.addEventListener('click', () => panels[btn.dataset.panel].close());
-});
+/* ── Nyheter panel ──────────────────────────────────────────── */
+(function(){
+  const el=document.getElementById('panel-nyheter'),list=el.querySelector('.panel-list');let activeIdx=-1;
+  function updateActive(){list.querySelectorAll('.panel-item').forEach((el,i)=>{el.classList.toggle('kb-active',i===activeIdx);if(i===activeIdx)el.scrollIntoView({block:'nearest'})})}
+  panels['nyheter']={el,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="nyheter"].panel-trigger')?.classList.add('active')},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="nyheter"].panel-trigger')?.classList.remove('active');activeIdx=-1},keydown(e){if(!el.classList.contains('open'))return;const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'||(e.key==='Tab'&&!e.shiftKey)){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive()}else if(e.key==='Enter'&&activeIdx>=0&&items[activeIdx]){e.preventDefault();items[activeIdx].click()}}};
+})();
 
-document.getElementById('overlay').addEventListener('click', closeAll);
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeAll();
-  const anyOpen = Object.values(panels).some(p => p.el.classList.contains('open'));
-  if (anyOpen) {
-    Object.values(panels).forEach(p => p.keydown(e));
-    return;
-  }
-  if ((e.key >= '0' && e.key <= '9') || e.key === '+') {
-    const target = document.querySelector(`[data-key="${e.key}"]`);
-    if (target) target.click();
-  }
+/* ── Global ─────────────────────────────────────────────────── */
+document.querySelectorAll('.panel-trigger').forEach(btn=>{btn.addEventListener('click',()=>{const id=btn.dataset.panel;panels[id].el.classList.contains('open')?panels[id].close():panels[id].open()})});
+document.querySelectorAll('.panel-close').forEach(btn=>{btn.addEventListener('click',()=>panels[btn.dataset.panel].close())});
+document.getElementById('overlay').addEventListener('click',closeAll);
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeAll();
+  const anyOpen=Object.values(panels).some(p=>p.el.classList.contains('open'));
+  if(anyOpen){Object.values(panels).forEach(p=>p.keydown(e));return}
+  const key=e.key.toLowerCase();
+  const target=document.querySelector(`[data-key="${key}"]`);
+  if(target&&hotkeys.includes(key)){e.preventDefault();target.click()}
 });
 </script>
 </body>
