@@ -1,15 +1,145 @@
+<!--
+╔══════════════════════════════════════════════════════════════════╗
+║  Hjem — personlig startside for ny fane i nettleseren           ║
+║  Repo: GitHub Pages · Én-fils HTML med eksterne datakilder      ║
+╚══════════════════════════════════════════════════════════════════╝
+
+HVORFOR DENNE BLOKKEN FINNES
+─────────────────────────────
+Denne kommentaren er en arkitekturreferanse for AI-assistert redigering.
+Den skal ALLTID være med når filen deles med en AI-assistent (f.eks. Claude),
+slik at assistenten forstår prosjektets oppbygging, datamodell og
+konvensjoner — uten å måtte se alle filer samtidig.
+
+PROSJEKTBESKRIVELSE
+───────────────────
+Startsiden er et tastaturvennlig dashboard rettet mot juridisk personvernarbeid.
+Menyen vises høyrejustert med Solarized-fargetema (lyst). Hvert menypunkt har
+en understreket hurtigtast. Noen menypunkt åpner eksterne lenker, mens andre
+åpner paneler (glide-inn fra høyre eller venstre) med søkbare lister.
+
+FILSTRUKTUR
+───────────
+  index.html     ← Denne filen. HTML-struktur, all CSS og all panel-logikk.
+  GDPRdata.js    ← Norsk GDPR-oversettelse: artikler 1–99 + fortalepunkter 1–173.
+                    Eksporterer objektet `gdpr` med .chapters, .articles, .recitals.
+  gdpr.js        ← Oppslagsdata for alle paneler:
+                    - gdprData    → engelske titler + gdpr.fan-lenker (GDPR-panelet, fane art/rec)
+                    - edpbData    → EDPB guidelines og recommendations med lenker
+                    - lovdataLookup → norske lover/forskrifter med Lovdata Pro-IDer og tags
+                    - datatilsynetData → Datatilsynets veiledere med URL-er og tags
+
+DATAFLYT
+────────
+  GDPRdata.js  ──→  GDPR-panelet: norsk fulltekst for artiklene og fortalepunktene.
+                     Brukes til detaljvisning (lesevisning, fullskjerm) og innholdssøk.
+
+  gdpr.js      ──→  GDPR-panelet: engelske korttitler i listevisning.
+                     EDPB-panelet: guidelines/recommendations med eksterne lenker.
+                     Lovdata-panelet: lover/forskrifter med Lovdata Pro-lenker.
+                     Datatilsynet-panelet: veiledere/temaer med datatilsynet.no-lenker.
+                     (Nyheter-panelet bruker hardkodede lenker i HTML.)
+
+DATAMODELL: GDPRdata.js
+───────────────────────
+  gdpr = {
+    chapters: [{ nr, no, range: [fra, til] }]       // 11 kapitler
+    articles: [{ nr, no, ch, text }]                 // 99 artikler, norsk fulltekst
+    recitals: [{ nr, no }]                           // 173 fortalepunkt, norsk fulltekst
+  }
+
+DATAMODELL: gdpr.js
+───────────────────
+  gdprData = {
+    art: [ ["Ch. N","Title","url"] | [N,"Title"] ]   // kapittellinje eller artikkellinje
+    rec: [ [N,"Short title"] ]                        // engelske korttitler
+  }
+  edpbData = {
+    gl:   [ ["id","title","url"] ]                    // guidelines
+    recs: [ ["id","title","url"] ]                    // recommendations
+  }
+  lovdataLookup = [
+    { id: "NL/lov/...", tags: [...], title: "..." }   // NL=lov, SF=forskrift, PROP=forarbeid
+  ]                                                    // URL = "https://lovdata.no/pro/#document/" + id
+  datatilsynetData = [
+    { url: "https://...", tags: [...], title: "..." }
+  ]
+
+PANELARKITEKTUR
+───────────────
+Hvert panel er en <div class="panel"> med header (tittel, lukk, ev. tabs, søk)
+og en scrollbar liste. Paneler glir inn fra-høyre eller fra-venstre.
+Panel-logikken ligger i separate IIFE-blokker i <script> nederst i filen.
+
+Alle paneler registrerer seg i det globale `panels`-objektet med:
+  { el, open(), close(), keydown(e), [render()], [search] }
+
+GDPR-panelet har i tillegg en detaljvisning (lesemodus) som utvider panelet
+til fullskjerm med serif-font og navigering mellom artikler/fortalepunkter.
+
+CSS-VARIABLER
+─────────────
+Alle farger bruker Solarized-paletten definert i :root.
+Semantiske alias: --bg, --text, --accent (cyan), --border, --hover-bg osv.
+Fargekoder for menypunktenes type-indikatorer:
+  .ind-panel (cyan)  .ind-list (violet)  .ind-link (blue)
+  .ind-tool (green)  .ind-port (yellow)  .ind-app (orange)
+
+HURTIGTASTER
+────────────
+Uten åpent panel: bokstavtaster åpner menypunkt (data-key attributt).
+Med åpent panel: Esc lukker, piltaster navigerer, Enter åpner,
+Tab går nedover, venstre/høyre bytter fane (der relevant).
+GDPR-detaljvisning: Esc → tilbake, piltaster → forrige/neste artikkel.
+
+SEKSJONER I DENNE FILEN
+────────────────────────
+Koden er delt i seksjoner merket med kommentarer på formen:
+  SECTION: NAVN
+Seksjonene er:
+
+  CSS:
+    SECTION: CSS_VARIABLES        – Solarized-palett og semantiske alias
+    SECTION: CSS_CORE             – Body, meny, hurtigtast-stil, cursor
+    SECTION: CSS_PANELS           – Panelkrom: header, tabs, søk, liste
+    SECTION: CSS_DETAIL           – Fullskjerm lesevisning (GDPR-detalj)
+    SECTION: CSS_SEARCH_MISC      – Søke-snippets, kapittelskille, preview
+    SECTION: CSS_RESPONSIVE       – Mobilbrekkpunkter
+
+  HTML:
+    SECTION: HTML_MENU            – Høyrejustert hovedmeny
+    SECTION: HTML_PANELS          – Alle panel-elementer (GDPR, EDPB, Lovdata, DT, Nyheter)
+
+  JavaScript:
+    SECTION: JS_GLOBALS           – panels-objekt, closeAll, hurtigtast-liste
+    SECTION: JS_GDPR_PANEL        – GDPR-panelets IIFE (list, search, detail, navigation)
+    SECTION: JS_EDPB_PANEL        – EDPB-panelets IIFE
+    SECTION: JS_LOVDATA_PANEL     – Lovdata-panelets IIFE
+    SECTION: JS_DATATILSYNET_PANEL – Datatilsynet-panelets IIFE
+    SECTION: JS_NYHETER_PANEL     – Nyheter-panelets IIFE (enkleste panelet)
+    SECTION: JS_GLOBAL_EVENTS     – Klikk-/tastatur-handlers, overlay
+
+VED AI-ASSISTERT REDIGERING
+───────────────────────────
+1. Lim alltid inn denne kontekstblokken + den seksjonen du vil endre.
+2. Referer til seksjonen med navn, f.eks. «endre SECTION: JS_GDPR_PANEL».
+3. Assistenten returnerer bare den oppdaterte seksjonen.
+4. Dersom endringen påvirker andre seksjoner (f.eks. ny CSS for ny funksjon),
+   bør assistenten angi det og returnere begge.
+-->
 <!DOCTYPE html>
 <html lang="nb">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hjem – Solarized</title>
+<title>Hjem</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@300;400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,400&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  /* ── SECTION: CSS_VARIABLES ── */
   :root {
     --base03:  #002b36;
     --base02:  #073642;
@@ -40,6 +170,7 @@
     --hover-bg: rgba(0,0,0,0.04);
   }
 
+  /* ── SECTION: CSS_CORE ── */
   body {
     font-family: 'Azeret Mono', monospace;
     background: var(--bg);
@@ -112,7 +243,7 @@
   }
   @keyframes blink { 50% { opacity: 0; } }
 
-  /* ── Panel ────────────────────────────────────────────────── */
+/* ── SECTION: CSS_PANELS ── */
   .panel {
     position: fixed; top: 0; width: 520px; height: 100vh;
     background: var(--bg-panel);
@@ -142,7 +273,7 @@
   .panel-tabs { display: flex; gap: 0; margin-bottom: 1rem; }
   .panel-tab {
     flex: 1; padding: 0.45em 0; background: none; border: 1px solid var(--border);
-    color: var(--text-mid); font: inherit; font-size: 0.85rem; font-weight: 400;
+    color: var(--text-mid); font: inherit; font-size: 0.9rem; font-weight: 400;
     cursor: pointer; transition: all 0.15s ease; letter-spacing: 0.02em;
     text-transform: lowercase;
   }
@@ -153,7 +284,7 @@
   .panel-search {
     width: 100%; padding: 0.55em 0.8em; background: var(--bg-input);
     border: 1px solid var(--border); border-radius: 3px; color: var(--text);
-    font: inherit; font-size: 0.85rem; font-weight: 400; outline: none;
+    font: inherit; font-size: 0.9rem; font-weight: 400; outline: none;
     transition: border-color 0.15s ease; margin-bottom: 0.5rem;
   }
   .panel-search::placeholder { color: var(--text-dim); }
@@ -170,7 +301,7 @@
   .panel-item {
     display: flex; align-items: baseline; gap: 0.7em;
     padding: 0.4em 0.4em; text-decoration: none; color: var(--text);
-    font-size: 0.9rem; font-weight: 400;
+    font-size: 0.95rem; font-weight: 400;
     border-bottom: 1px solid var(--border-lt);
     border-radius: 2px;
     transition: background-color 0.06s ease;
@@ -178,12 +309,12 @@
   .panel-item:hover, .panel-item.kb-active { background: var(--hover-bg); }
   .panel-item .num {
     flex-shrink: 0; width: 6.5em; text-align: right; font-weight: 500;
-    color: var(--accent); font-size: 0.8rem;
+    color: var(--accent); font-size: 0.85rem;
   }
   .panel-item .title {
     flex: 1; line-height: 1.5;
     font-family: 'Azeret Mono', monospace; font-weight: 400;
-    font-size: 0.85rem; color: var(--text-mid);
+    font-size: 0.9rem; color: var(--text-mid);
   }
   .panel-item:hover .title, .panel-item.kb-active .title { color: var(--text); }
   .panel-empty { color: var(--text-dim); font-size: 0.85rem; font-weight: 400; padding: 1em 0.3em; font-style: italic; }
@@ -199,7 +330,7 @@
     margin-bottom: 0.5rem;
   }
 
-  /* ── Detail / lesemodus ───────────────────────────────────── */
+  /* ── SECTION: CSS_DETAIL ── */
   .panel.detail-open {
     width: 100vw; border-left: none; border-right: none; background: var(--bg);
   }
@@ -266,6 +397,7 @@
   }
   .detail-prev:hover, .detail-next:hover { color: var(--accent); }
 
+  /* ── SECTION: CSS_SEARCH_MISC ── */
   .search-snippet {
     display: block; font-size: 0.75rem; color: var(--text-dim); font-weight: 400;
     margin-top: 0.2em; line-height: 1.5;
@@ -288,6 +420,7 @@
     overflow: hidden; text-overflow: ellipsis;
   }
 
+  /* ── SECTION: CSS_RESPONSIVE ── */
   @media (max-width: 600px) {
     .page { font-size: 0.95rem; }
     .panel { width: 100%; }
@@ -297,6 +430,7 @@
 </head>
 <body>
 
+<!-- ── SECTION: HTML_MENU ── -->
   <div class="page">
     <a href="https://booking.webgate.no/" data-key="b"><span class="hk">b</span>erg-hansen <span class="ind ind-tool">.book</span></a>
     <a href="https://www.claude.ai" data-key="c"><span class="hk">c</span>laude <span class="ind ind-tool">.run</span></a>
@@ -313,10 +447,12 @@
     <a href="https://min.rettsdata.no/" data-key="r"><span class="hk">r</span>ettsdata <span class="ind ind-link">.ref</span></a>
     <a href="spotify://" data-key="s"><span class="hk">s</span>potify <span class="ind ind-app">.ogg</span></a>
     <a href="msteams://" data-key="t"><span class="hk">t</span>eams <span class="ind ind-app">.app</span></a>
+    <a href="todoist://" data-key="o">t<span class="hk">o</span>doist <span class="ind ind-app">.app</span></a>
     <a href="ms-word:nft|u|" data-key="w"><span class="hk">w</span>ord <span class="ind ind-app">.app</span></a>
     <div class="cursor-line">~<span class="cursor"></span></div>
   </div>
 
+  <!-- ── SECTION: HTML_PANELS ── -->
   <div class="overlay" id="overlay"></div>
 
   <!-- GDPR panel -->
@@ -398,12 +534,13 @@
 <script src="gdpr.js"></script>
 
 <script>
+/* ── SECTION: JS_GLOBALS ── */
 const panels={};
-const hotkeys='gerldjinbyctsxwp'.split('');
+const hotkeys='gerldjinbyctsxwpo'.split('');
 
 function closeAll(){Object.values(panels).forEach(p=>p.close())}
 
-/* ── GDPR panel ─────────────────────────────────────────────── */
+/* ── SECTION: JS_GDPR_PANEL ── */
 (function(){
   const el=document.getElementById('panel-gdpr'),header=el.querySelector('.panel-header'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list'),tabBtns=el.querySelectorAll('.panel-tab');
   let currentTab='art',activeIdx=-1,detailMode=false,detailNr=null,detailType=null;
@@ -481,7 +618,7 @@ function closeAll(){Object.values(panels).forEach(p=>p.close())}
   panels['gdpr']={el,search,list,render:renderList,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="gdpr"].panel-trigger')?.classList.add('active');if(detailMode)hideDetail();renderList();setTimeout(()=>search.focus(),300)},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="gdpr"].panel-trigger')?.classList.remove('active');search.value='';activeIdx=-1;if(detailMode){detailMode=false;detailNr=null;detailType=null;el.classList.remove('detail-open');header.querySelectorAll('.panel-tabs,.panel-search').forEach(e=>e.style.display='')}},keydown(e){if(!el.classList.contains('open'))return;if(detailMode){if(e.key==='Escape'){e.preventDefault();hideDetail();return}if(e.key==='ArrowLeft'){const p=list.querySelector('.detail-prev');if(p){e.preventDefault();showDetail(detailType,parseInt(p.dataset.nr))}return}if(e.key==='ArrowRight'){const n=list.querySelector('.detail-next');if(n){e.preventDefault();showDetail(detailType,parseInt(n.dataset.nr))}return}return}const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive();if(activeIdx===-1)search.focus()}else if(e.key==='Enter'&&activeIdx>=0&&items[activeIdx]){e.preventDefault();items[activeIdx].click()}else if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&!search.value){e.preventDefault();currentTab=currentTab==='art'?'rec':'art';tabBtns.forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));renderList();list.scrollTop=0;search.focus()}}};
 })();
 
-/* ── EDPB panel ─────────────────────────────────────────────── */
+/* ── SECTION: JS_EDPB_PANEL ── */
 (function(){
   const el=document.getElementById('panel-edpb'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list'),tabs=el.querySelectorAll('.panel-tab');
   const data=edpbData,keys=Object.keys(data);let currentTab=keys[0],activeIdx=-1;
@@ -492,7 +629,7 @@ function closeAll(){Object.values(panels).forEach(p=>p.close())}
   panels['edpb']={el,search,list,render,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="edpb"].panel-trigger')?.classList.add('active');render();setTimeout(()=>search.focus(),300)},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="edpb"].panel-trigger')?.classList.remove('active');search.value='';activeIdx=-1},keydown(e){if(!el.classList.contains('open'))return;const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive();if(activeIdx===-1)search.focus()}else if(e.key==='Enter'&&activeIdx>=0&&items[activeIdx]){e.preventDefault();items[activeIdx].click()}else if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&!search.value&&keys.length>1){e.preventDefault();const i=keys.indexOf(currentTab);currentTab=keys[(i+1)%keys.length];tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));activeIdx=-1;render();list.scrollTop=0;search.focus()}}};
 })();
 
-/* ── Lovdata panel ──────────────────────────────────────────── */
+/* ── SECTION: JS_LOVDATA_PANEL ── */
 (function(){
   const el=document.getElementById('panel-lovdata'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list');let activeIdx=-1;
   function render(){const q=search.value.toLowerCase().trim();const results=q?lovdataLookup.filter(e=>e.tags.some(t=>t.includes(q))||e.title.toLowerCase().includes(q)):lovdataLookup;if(!results.length){list.innerHTML='<div class="panel-empty">ingen treff</div>';return}list.innerHTML=results.map(e=>{const type=e.id.startsWith('SF/')?'forskrift':'lov';return`<a class="panel-item" href="https://lovdata.no/pro/#document/${e.id}"><span class="num">${type}</span><span class="title">${e.title}</span></a>`}).join('')}
@@ -501,7 +638,7 @@ function closeAll(){Object.values(panels).forEach(p=>p.close())}
   panels['lovdata']={el,search,list,render,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="lovdata"].panel-trigger')?.classList.add('active');render();setTimeout(()=>search.focus(),300)},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="lovdata"].panel-trigger')?.classList.remove('active');search.value='';activeIdx=-1},keydown(e){if(!el.classList.contains('open'))return;const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive();if(activeIdx===-1)search.focus()}else if(e.key==='Enter'){e.preventDefault();if(activeIdx>=0&&items[activeIdx])items[activeIdx].click();else if(!search.value.trim())window.location.href='https://lovdata.no/pro/#myPage';else if(items.length===1)items[0].click()}else if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}}};
 })();
 
-/* ── Datatilsynet panel ─────────────────────────────────────── */
+/* ── SECTION: JS_DATATILSYNET_PANEL ── */
 (function(){
   const el=document.getElementById('panel-datatilsynet'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list');let activeIdx=-1;
   function render(){const q=search.value.toLowerCase().trim();const results=q?datatilsynetData.filter(e=>e.tags.some(t=>t.includes(q))||e.title.toLowerCase().includes(q)):datatilsynetData;if(!results.length){list.innerHTML='<div class="panel-empty">ingen treff</div>';return}list.innerHTML=results.map(e=>`<a class="panel-item" href="${e.url}"><span class="title">${e.title.toLowerCase()}</span></a>`).join('')}
@@ -510,14 +647,14 @@ function closeAll(){Object.values(panels).forEach(p=>p.close())}
   panels['datatilsynet']={el,search,list,render,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="datatilsynet"].panel-trigger')?.classList.add('active');render();setTimeout(()=>search.focus(),300)},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="datatilsynet"].panel-trigger')?.classList.remove('active');search.value='';activeIdx=-1},keydown(e){if(!el.classList.contains('open'))return;const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive();if(activeIdx===-1)search.focus()}else if(e.key==='Enter'){e.preventDefault();if(activeIdx>=0&&items[activeIdx])items[activeIdx].click();else if(!search.value.trim())window.location.href='https://www.datatilsynet.no/';else if(items.length===1)items[0].click()}else if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}}};
 })();
 
-/* ── Nyheter panel ──────────────────────────────────────────── */
+/* ── SECTION: JS_NYHETER_PANEL ── */
 (function(){
   const el=document.getElementById('panel-nyheter'),list=el.querySelector('.panel-list');let activeIdx=-1;
   function updateActive(){list.querySelectorAll('.panel-item').forEach((el,i)=>{el.classList.toggle('kb-active',i===activeIdx);if(i===activeIdx)el.scrollIntoView({block:'nearest'})})}
   panels['nyheter']={el,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="nyheter"].panel-trigger')?.classList.add('active')},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="nyheter"].panel-trigger')?.classList.remove('active');activeIdx=-1},keydown(e){if(!el.classList.contains('open'))return;const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'||(e.key==='Tab'&&!e.shiftKey)){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive()}else if(e.key==='Enter'&&activeIdx>=0&&items[activeIdx]){e.preventDefault();items[activeIdx].click()}}};
 })();
 
-/* ── Global ─────────────────────────────────────────────────── */
+/* ── SECTION: JS_GLOBAL_EVENTS ── */
 document.querySelectorAll('.panel-trigger').forEach(btn=>{btn.addEventListener('click',()=>{const id=btn.dataset.panel;panels[id].el.classList.contains('open')?panels[id].close():panels[id].open()})});
 document.querySelectorAll('.panel-close').forEach(btn=>{btn.addEventListener('click',()=>panels[btn.dataset.panel].close())});
 document.getElementById('overlay').addEventListener('click',closeAll);
