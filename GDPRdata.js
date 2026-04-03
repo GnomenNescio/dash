@@ -1,671 +1,680 @@
-<!--
-╔══════════════════════════════════════════════════════════════════╗
-║  Hjem — personlig startside for ny fane i nettleseren           ║
-║  Repo: GitHub Pages · Én-fils HTML med eksterne datakilder      ║
-╚══════════════════════════════════════════════════════════════════╝
-
-HVORFOR DENNE BLOKKEN FINNES
-─────────────────────────────
-Denne kommentaren er en arkitekturreferanse for AI-assistert redigering.
-Den skal ALLTID være med når filen deles med en AI-assistent (f.eks. Claude),
-slik at assistenten forstår prosjektets oppbygging, datamodell og
-konvensjoner — uten å måtte se alle filer samtidig.
-
-PROSJEKTBESKRIVELSE
-───────────────────
-Startsiden er et tastaturvennlig dashboard rettet mot juridisk personvernarbeid.
-Menyen vises høyrejustert med Solarized-fargetema (lyst). Hvert menypunkt har
-en understreket hurtigtast. Noen menypunkt åpner eksterne lenker, mens andre
-åpner paneler (glide-inn fra høyre eller venstre) med søkbare lister.
-
-FILSTRUKTUR
-───────────
-  index.html     ← Denne filen. HTML-struktur, all CSS og all panel-logikk.
-  GDPRdata.js    ← Norsk GDPR-oversettelse: artikler 1–99 + fortalepunkter 1–173.
-                    Eksporterer objektet `gdpr` med .chapters, .articles, .recitals.
-  gdpr.js        ← Oppslagsdata for alle paneler:
-                    - gdprData    → engelske titler + gdpr.fan-lenker (GDPR-panelet, fane art/rec)
-                    - edpbData    → EDPB guidelines og recommendations med lenker
-                    - lovdataLookup → norske lover/forskrifter med Lovdata Pro-IDer og tags
-                    - datatilsynetData → Datatilsynets veiledere med URL-er og tags
-
-DATAFLYT
-────────
-  GDPRdata.js  ──→  GDPR-panelet: norsk fulltekst for artiklene og fortalepunktene.
-                     Brukes til detaljvisning (lesevisning, fullskjerm) og innholdssøk.
-
-  gdpr.js      ──→  GDPR-panelet: engelske korttitler i listevisning.
-                     EDPB-panelet: guidelines/recommendations med eksterne lenker.
-                     Lovdata-panelet: lover/forskrifter med Lovdata Pro-lenker.
-                     Datatilsynet-panelet: veiledere/temaer med datatilsynet.no-lenker.
-                     (Nyheter-panelet bruker hardkodede lenker i HTML.)
-
-DATAMODELL: GDPRdata.js
-───────────────────────
-  gdpr = {
-    chapters: [{ nr, no, range: [fra, til] }]       // 11 kapitler
-    articles: [{ nr, no, ch, text }]                 // 99 artikler, norsk fulltekst
-    recitals: [{ nr, no }]                           // 173 fortalepunkt, norsk fulltekst
-  }
-
-DATAMODELL: gdpr.js
-───────────────────
-  gdprData = {
-    art: [ ["Ch. N","Title","url"] | [N,"Title"] ]   // kapittellinje eller artikkellinje
-    rec: [ [N,"Short title"] ]                        // engelske korttitler
-  }
-  edpbData = {
-    gl:   [ ["id","title","url"] ]                    // guidelines
-    recs: [ ["id","title","url"] ]                    // recommendations
-  }
-  lovdataLookup = [
-    { id: "NL/lov/...", tags: [...], title: "..." }   // NL=lov, SF=forskrift, PROP=forarbeid
-  ]                                                    // URL = "https://lovdata.no/pro/#document/" + id
-  datatilsynetData = [
-    { url: "https://...", tags: [...], title: "..." }
+const gdprData = {
+  art: [
+    ["Ch. 1","General provisions (Art. 1–4)","https://gdpr.fan/c1"],
+    [1,"Subject-matter and objectives"],[2,"Material scope"],[3,"Territorial scope"],[4,"Definitions"],
+    ["Ch. 2","Principles (Art. 5–11)","https://gdpr.fan/c2"],
+    [5,"Principles relating to processing of personal data"],[6,"Lawfulness of processing"],[7,"Conditions for consent"],
+    [8,"Child's consent for information society services"],[9,"Processing of special categories of personal data"],
+    [10,"Processing re criminal convictions and offences"],[11,"Processing not requiring identification"],
+    ["Ch. 3","Rights of the data subject (Art. 12–23)","https://gdpr.fan/c3"],
+    [12,"Transparent information, communication and modalities"],[13,"Information where data collected from data subject"],
+    [14,"Information where data not obtained from data subject"],[15,"Right of access by the data subject"],
+    [16,"Right to rectification"],[17,"Right to erasure ('right to be forgotten')"],[18,"Right to restriction of processing"],
+    [19,"Notification obligation re rectification or erasure"],[20,"Right to data portability"],[21,"Right to object"],
+    [22,"Automated individual decision-making, including profiling"],[23,"Restrictions"],
+    ["Ch. 4","Controller and processor (Art. 24–43)","https://gdpr.fan/c4"],
+    [24,"Responsibility of the controller"],[25,"Data protection by design and by default"],[26,"Joint controllers"],
+    [27,"Representatives not established in the Union"],[28,"Processor"],
+    [29,"Processing under authority of controller or processor"],[30,"Records of processing activities"],
+    [31,"Cooperation with the supervisory authority"],[32,"Security of processing"],
+    [33,"Notification of breach to supervisory authority"],[34,"Communication of breach to data subject"],
+    [35,"Data protection impact assessment"],[36,"Prior consultation"],
+    [37,"Designation of the data protection officer"],[38,"Position of the data protection officer"],
+    [39,"Tasks of the data protection officer"],[40,"Codes of conduct"],[41,"Monitoring of approved codes of conduct"],
+    [42,"Certification"],[43,"Certification bodies"],
+    ["Ch. 5","Transfers to third countries (Art. 44–50)","https://gdpr.fan/c5"],
+    [44,"General principle for transfers"],
+    [45,"Transfers based on adequacy decision"],[46,"Transfers subject to appropriate safeguards"],
+    [47,"Binding corporate rules"],[48,"Transfers or disclosures not authorised by Union law"],
+    [49,"Derogations for specific situations"],[50,"International cooperation for data protection"],
+    ["Ch. 6","Independent supervisory authorities (Art. 51–59)","https://gdpr.fan/c6"],
+    [51,"Supervisory authority"],[52,"Independence"],[53,"General conditions for supervisory authority members"],
+    [54,"Rules on establishment of supervisory authority"],[55,"Competence"],
+    [56,"Competence of lead supervisory authority"],[57,"Tasks"],[58,"Powers"],[59,"Activity reports"],
+    ["Ch. 7","Cooperation and consistency (Art. 60–76)","https://gdpr.fan/c7"],
+    [60,"Cooperation between lead and other supervisory authorities"],[61,"Mutual assistance"],
+    [62,"Joint operations of supervisory authorities"],[63,"Consistency mechanism"],[64,"Opinion of the Board"],
+    [65,"Dispute resolution by the Board"],[66,"Urgency procedure"],[67,"Exchange of information"],
+    [68,"European Data Protection Board"],[69,"Independence"],[70,"Tasks of the Board"],[71,"Reports"],
+    [72,"Procedure"],[73,"Chair"],[74,"Tasks of the Chair"],[75,"Secretariat"],[76,"Confidentiality"],
+    ["Ch. 8","Remedies, liability and penalties (Art. 77–84)","https://gdpr.fan/c8"],
+    [77,"Right to lodge a complaint with supervisory authority"],
+    [78,"Right to judicial remedy against supervisory authority"],
+    [79,"Right to judicial remedy against controller or processor"],[80,"Representation of data subjects"],
+    [81,"Suspension of proceedings"],[82,"Right to compensation and liability"],
+    [83,"General conditions for imposing administrative fines"],[84,"Penalties"],
+    ["Ch. 9","Specific processing situations (Art. 85–91)","https://gdpr.fan/c9"],
+    [85,"Processing and freedom of expression and information"],[86,"Processing and public access to official documents"],
+    [87,"Processing of the national identification number"],[88,"Processing in the context of employment"],
+    [89,"Safeguards for archiving, research or statistical purposes"],[90,"Obligations of secrecy"],
+    [91,"Existing data protection rules of churches and religious associations"],
+    ["Ch. 10","Delegated acts and implementing acts (Art. 92–93)","https://gdpr.fan/c10"],
+    [92,"Exercise of the delegation"],[93,"Committee procedure"],
+    ["Ch. 11","Final provisions (Art. 94–99)","https://gdpr.fan/c11"],
+    [94,"Repeal of Directive 95/46/EC"],[95,"Relationship with Directive 2002/58/EC"],
+    [96,"Relationship with previously concluded Agreements"],[97,"Commission reports"],
+    [98,"Review of other Union legal acts on data protection"],[99,"Entry into force and application"]
+  ],
+  rec: [
+    [1,"Data Protection as a Fundamental Right"],[2,"Respect of Fundamental Rights and Freedoms"],
+    [3,"Directive 95/46/EC Harmonisation"],[4,"Data Protection in Balance with Other Fundamental Rights"],
+    [5,"Cooperation Between Member States to Exchange Personal Data"],
+    [6,"High Level of Data Protection Despite Increased Exchange"],
+    [7,"Framework Based on Control and Certainty"],[8,"Adoption into National Law"],
+    [9,"Different Standards of Protection by Directive 95/46/EC"],
+    [10,"Harmonised Level of Data Protection Despite National Scope"],
+    [11,"Harmonisation of Powers and Sanctions"],[12,"Authorization of the European Parliament and Council"],
+    [13,"Taking Account of Micro, Small and Medium-Sized Enterprises"],[14,"Not Applicable to Legal Persons"],
+    [15,"Technology Neutrality"],[16,"Not Applicable to National and Common Security"],
+    [17,"Adaptation of Regulation (EC) No 45/2001"],[18,"Not Applicable to Personal or Household Activities"],
+    [19,"Not Applicable to Criminal Prosecution"],[20,"Respecting Independence of the Judiciary"],
+    [21,"Liability Rules of Intermediary Service Providers"],[22,"Processing by an Establishment"],
+    [23,"Applicable if Data Subjects in Union are Targeted"],[24,"Applicable if Data Subjects in Union are Profiled"],
+    [25,"Applicable to Controllers Due to International Law"],[26,"Not Applicable to Anonymous Data"],
+    [27,"Not Applicable to Data of Deceased Persons"],[28,"Introduction of Pseudonymisation"],
+    [29,"Pseudonymisation at the Same Controller"],[30,"Online Identifiers for Profiling and Identification"],
+    [31,"Not Applicable to Public Authorities in Official Tasks"],[32,"Conditions for Consent"],
+    [33,"Consent to Certain Areas of Scientific Research"],[34,"Genetic Data"],[35,"Health Data"],
+    [36,"Determination of the Main Establishment"],[37,"Group of Undertakings"],
+    [38,"Special Protection of Children's Personal Data"],[39,"Principles of Data Processing"],
+    [40,"Lawfulness of Data Processing"],[41,"Legal Basis or Legislative Measures"],
+    [42,"Burden of Proof and Requirements for Consent"],[43,"Freely Given Consent"],
+    [44,"Performance of a Contract"],[45,"Fulfillment of Legal Obligations"],
+    [46,"Vital Interests of the Data Subject"],[47,"Overriding Legitimate Interest"],
+    [48,"Overriding Legitimate Interest Within Group of Undertakings"],
+    [49,"Network and Information Security as Legitimate Interest"],[50,"Further Processing of Personal Data"],
+    [51,"Protecting Sensitive Personal Data"],[52,"Exceptions to Prohibition on Special Categories Processing"],
+    [53,"Sensitive Data in Health and Social Sector"],[54,"Sensitive Data in Public Health Sector"],
+    [55,"Processing by Official Authorities for Religious Communities"],
+    [56,"Processing Political Opinions by Parties"],[57,"Additional Data for Identification"],
+    [58,"Principle of Transparency"],[59,"Procedures for Exercise of Data Subject Rights"],
+    [60,"Information Obligation"],[61,"Time of Information"],
+    [62,"Exceptions to Obligation to Provide Information"],[63,"Right of Access"],
+    [64,"Identity Verification"],[65,"Right of Rectification and Erasure"],[66,"Right to be Forgotten"],
+    [67,"Restriction of Processing"],[68,"Right of Data Portability"],[69,"Right to Object"],
+    [70,"Right to Object to Direct Marketing"],[71,"Profiling"],
+    [72,"EDPB Guidance Regarding Profiling"],[73,"Restrictions of Rights and Principles"],
+    [74,"Responsibility and Liability of the Controller"],[75,"Risks to Rights and Freedoms of Natural Persons"],
+    [76,"Risk Assessment"],[77,"Risk Assessment Guidelines"],
+    [78,"Appropriate Technical and Organisational Measures"],
+    [79,"Allocation of Responsibilities"],[80,"Designation of a Representative"],
+    [81,"The Use of Processors"],[82,"Record of Processing Activities"],[83,"Security of Processing"],
+    [84,"Risk Evaluation and Impact Assessment"],[85,"Notification of Breaches to Supervisory Authority"],
+    [86,"Notification of Data Subjects in Case of Breaches"],[87,"Promptness of Reporting / Notification"],
+    [88,"Format and Procedures of the Notification"],[89,"Elimination of General Reporting Requirement"],
+    [90,"Data Protection Impact Assessment"],[91,"Necessity of a DPIA"],[92,"Broader DPIA"],
+    [93,"DPIA at Authorities"],[94,"Consultation of the Supervisory Authority"],
+    [95,"Support by the Processor"],[96,"Consultation in the Course of a Legislative Process"],
+    [97,"Data Protection Officer"],[98,"Preparation of Codes of Conduct"],
+    [99,"Consultation of Stakeholders in Codes of Conduct"],[100,"Certification"],
+    [101,"General Principles for International Data Transfers"],
+    [102,"International Agreements for Appropriate Level of Protection"],
+    [103,"Appropriate Level Based on Adequacy Decision"],[104,"Criteria for an Adequacy Decision"],
+    [105,"Consideration of International Agreements for Adequacy"],[106,"Monitoring and Periodic Review"],
+    [107,"Amendment, Revocation and Suspension of Adequacy Decisions"],[108,"Appropriate Safeguards"],
+    [109,"Standard Data Protection Clauses"],[110,"Binding Corporate Rules"],
+    [111,"Exceptions for Certain Cases of International Transfers"],
+    [112,"Transfers due to Important Reasons of Public Interest"],
+    [113,"Transfers Not Repetitive / Limited Number of Data Subjects"],
+    [114,"Safeguarding Rights in Absence of Adequacy Decision"],
+    [115,"Third Country Rules Contrary to the Regulation"],
+    [116,"Cooperation Among Supervisory Authorities"],[117,"Establishment of Supervisory Authorities"],
+    [118,"Monitoring of Supervisory Authorities"],[119,"Organisation of Several Supervisory Authorities"],
+    [120,"Features of Supervisory Authorities"],[121,"Independence of Supervisory Authorities"],
+    [122,"Responsibility of Supervisory Authorities"],
+    [123,"Cooperation with Each Other and with the Commission"],
+    [124,"Lead Authority Regarding Processing in Several Member States"],
+    [125,"Competences of the Lead Authority"],[126,"Joint Decisions"],
+    [127,"Information Regarding Local Processing"],
+    [128,"Responsibility Regarding Processing in the Public Interest"],
+    [129,"Tasks and Powers of Supervisory Authorities"],
+    [130,"Consideration of Authority with which Complaint Lodged"],
+    [131,"Attempt of an Amicable Settlement"],[132,"Awareness-Raising Activities and Specific Measures"],
+    [133,"Mutual Assistance and Provisional Measures"],[134,"Participation in Joint Operations"],
+    [135,"Consistency Mechanism"],[136,"Binding Decisions and Opinions of the Board"],
+    [137,"Provisional Measures"],[138,"Urgency Procedure"],[139,"European Data Protection Board"],
+    [140,"Secretariat and Staff of the Board"],[141,"Right to Lodge a Complaint"],
+    [142,"Right to Mandate a Not-For-Profit Body"],[143,"Judicial Remedies"],
+    [144,"Related Proceedings"],[145,"Choice of Venue"],[146,"Indemnity"],[147,"Jurisdiction"],
+    [148,"Penalties"],[149,"Penalties for Infringements of National Rules"],[150,"Administrative Fines"],
+    [151,"Administrative Fines in Denmark and Estonia"],[152,"Power of Sanction of Member States"],
+    [153,"Processing for Journalistic, Academic, Artistic or Literary Purposes"],
+    [154,"Principle of Public Access to Official Documents"],[155,"Processing in Employment Context"],
+    [156,"Processing for Archiving, Research or Statistical Purposes"],
+    [157,"Information from Registries and Scientific Research"],[158,"Processing for Archiving Purposes"],
+    [159,"Processing for Scientific Research Purposes"],[160,"Processing for Historical Research Purposes"],
+    [161,"Consenting to Clinical Trials"],[162,"Processing for Statistical Purposes"],
+    [163,"Production of European and National Statistics"],
+    [164,"Professional or Equivalent Secrecy Obligations"],
+    [165,"Status of Churches and Religious Associations"],
+    [166,"Delegated Acts of the Commission"],[167,"Implementing Powers of the Commission"],
+    [168,"Implementing Acts on Standard Contractual Clauses"],
+    [169,"Immediately Applicable Implementing Acts"],
+    [170,"Principle of Subsidiarity and Proportionality"],
+    [171,"Repeal of Directive 95/46/EC and Transitional Provisions"],
+    [172,"Consultation of the European Data Protection Supervisor"],
+    [173,"Relationship to Directive 2002/58/EC"]
   ]
+};
 
-PANELARKITEKTUR
-───────────────
-Hvert panel er en <div class="panel"> med header (tittel, lukk, ev. tabs, søk)
-og en scrollbar liste. Paneler glir inn fra-høyre eller fra-venstre.
-Panel-logikken ligger i separate IIFE-blokker i <script> nederst i filen.
+const edpbData = {
+  gl: [
+    ["7/2020","Concepts of controller and processor","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-072020-concepts-controller-and-processor-gdpr_en"],
+    ["5/2020","Consent under Regulation 2016/679","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052020-consent-under-regulation-2016679_en"],
+    ["4/2019","Art. 25 — Data Protection by Design and by Default","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-42019-article-25-data-protection-design-and_en"],
+    ["1/2024","Processing based on Article 6(1)(f) GDPR","https://www.edpb.europa.eu/our-work-tools/documents/public-consultations/2024/guidelines-12024-processing-personal-data-based_en"],
+    ["9/2022","Personal data breach notification under GDPR","https://edpb.europa.eu/our-work-tools/documents/public-consultations/2022/guidelines-92022-personal-data-breach_en"],
+    ["1/2021","Examples regarding Data Breach Notification","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-012021-examples-regarding-personal-data-breach_en"],
+    ["5/2021","Interplay between Art. 3 and Chapter V (transfers)","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052021-interplay-between-application-article-3_en"],
+    ["1/2022","Data subject rights — Right of access","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-012022-data-subject-rights-right-access_en"],
+    ["2/2019","Art. 6(1)(b) — online services to data subjects","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-22019-processing-personal-data-under-article-61b_en"],
+    ["3/2018","Territorial scope of the GDPR (Art. 3)","https://edpb.europa.eu/our-work-tools/documents/public-consultations/2018/guidelines-32018-territorial-scope-gdpr-article_en"],
+    ["2/2018","Derogations of Article 49","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-22018-derogations-article-49-under-regulation_en"],
+    ["1/2025","Pseudonymisation","https://www.edpb.europa.eu/our-work-tools/documents/public-consultations/2025/guidelines-012025-pseudonymisation_en"],
+    ["8/2020","Targeting of social media users","https://edpb.europa.eu/our-work-tools/documents/public-consultations/2020/guidelines-082020-targeting-social-media-users_en"],
+    ["2/2023","Technical Scope of Art. 5(3) ePrivacy Directive","https://edpb.europa.eu/our-work-tools/documents/public-consultations/2023/guidelines-22023-technical-scope-art-53-eprivacy_en"],
+    ["3/2022","Deceptive design patterns in social media","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-032022-deceptive-design-patterns-social-media_en"],
+    ["4/2022","Calculation of administrative fines","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-042022-calculation-administrative-fines-under_en"],
+    ["3/2019","Processing through video devices","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-32019-processing-personal-data-through-video_en"],
+    ["5/2019","Right to be Forgotten in search engines","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-52019-criteria-right-be-forgotten-search-engines_en"],
+    ["3/2025","Interplay between the DSA and the GDPR","https://www.edpb.europa.eu/our-work-tools/documents/public-consultations/2025/guidelines-32025-interplay-between-dsa-and-gdpr_en"],
+    ["10/2020","Restrictions under Article 23 GDPR","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-102020-restrictions-under-article-23-gdpr_en"],
+    ["Joint","Interplay between the DMA and the GDPR","https://www.edpb.europa.eu/our-work-tools/documents/public-consultations/2025/joint-guidelines-interplay-between-digital_en"],
+    ["8/2022","Identifying a controller or processor's lead SA","https://edpb.europa.eu/our-work-tools/documents/public-consultations/2022/guidelines-82022-identifying-controller-or_en"],
+    ["2/2024","Article 48 GDPR","https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-022024-article-48-gdpr_en"],
+    ["6/2020","Interplay of PSD2 and GDPR","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-062020-interplay-second-payment-services_en"],
+    ["1/2020","Connected vehicles and mobility applications","https://edpb.europa.eu/our-work-tools/documents/public-consultations/2020/guidelines-12020-processing-personal-data_en"],
+    ["2/2021","Virtual Voice Assistants","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-022021-virtual-voice-assistants_en"],
+    ["3/2020","Health data for scientific research (COVID-19)","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-032020-processing-data-concerning-health-purpose_en"],
+    ["2/2025","Processing of personal data through blockchain technologies","https://www.edpb.europa.eu/our-work-tools/documents/public-consultations/2025/guidelines-022025-processing-personal-data_en"],
+    ["4/2020","Location data and contact tracing (COVID-19)","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-042020-use-location-data-and-contact-tracing_en"],
+    ["1/2019","Codes of Conduct and Monitoring Bodies","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-12019-codes-conduct-and-monitoring-bodies-0_en"],
+    ["4/2021","Codes of conduct as tools for transfers","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-042021-codes-conduct-tools-transfers_en"],
+    ["7/2022","Certification as a tool for transfers","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-072022-certification-tool-transfers_en"],
+    ["4/2018","Accreditation of certification bodies (Art. 43)","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-42018-accreditation-certification-bodies-under_en"],
+    ["1/2018","Certification criteria (Art. 42 and 43)","https://edpb.europa.eu/our-work-tools/documents/public-consultations/2018/guidelines-12018-certification-and-identifying_en"],
+    ["2/2020","Art. 46(2)(a) and 46(3)(b) — transfers between public authorities","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-22020-articles-46-2-and-46-3-b-regulation_en"],
+    ["9/2020","Relevant and reasoned objection","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-092020-relevant-and-reasoned-objection-under_en"],
+    ["2/2022","Application of Article 60 GDPR","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-022022-application-article-60-gdpr_en"],
+    ["3/2021","Application of Article 65(1)(a) GDPR","https://edpb.europa.eu/our-work-tools/documents/public-consultations/2021/guidelines-032021-application-article-651a-gdpr_en"],
+    ["6/2022","Practical implementation of amicable settlements","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-062022-practical-implementation-amicable_en"],
+    ["5/2022","Facial recognition in law enforcement","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052022-use-facial-recognition-technology-area_en"],
+    ["1/2023","Article 37 Law Enforcement Directive","https://edpb.europa.eu/our-work-tools/documents/public-consultations/2023/guidelines-012023-article-37-law-enforcement_en"]  ],
+  recs: [
+    ["1/2020","Supplementary measures for transfer tools","https://edpb.europa.eu/our-work-tools/our-documents/recommendations/recommendations-012020-measures-supplement-transfer_en"],
+    ["2/2020","European Essential Guarantees for surveillance measures","https://edpb.europa.eu/our-work-tools/our-documents/recommendations/recommendations-022020-european-essential-guarantees_en"],
+    ["1/2026","Processor Binding Corporate Rules (Art. 47)","https://www.edpb.europa.eu/our-work-tools/documents/public-consultations/2026/recommendations-12026-application-approval-and_en"],
+    ["2/2025","Legal basis for user accounts on e-commerce websites","https://www.edpb.europa.eu/our-work-tools/documents/public-consultations/2025/recommendations-22025-legal-basis-requiring_en"],
+    ["1/2025","2027 WADA World Anti-Doping Code","https://www.edpb.europa.eu/our-work-tools/our-documents/recommendations/recommendations-12025-2027-wada-world-anti-doping-code_en"],
+    ["1/2022","Controller Binding Corporate Rules (Art. 47)","https://www.edpb.europa.eu/our-work-tools/our-documents/recommendations/recommendations-12022-application-approval-and_en"],
+    ["1/2021","Adequacy referential under the LED","https://edpb.europa.eu/our-work-tools/our-documents/recommendations/recommendations-012021-adequacy-referential-under-law_en"],
+  ]
+};
 
-Alle paneler registrerer seg i det globale `panels`-objektet med:
-  { el, open(), close(), keydown(e), [render()], [search] }
+const lovdataLookup = [
 
-GDPR-panelet har i tillegg en detaljvisning (lesemodus) som utvider panelet
-til fullskjerm med serif-font og navigering mellom artikler/fortalepunkter.
+  // === PERSONVERN ===
+  {
+    id: 'NL/lov/2018-06-15-38',
+    tags: ['personopplysningsloven', 'popl', 'personvern', 'gdpr'],
+    title: 'Personopplysningsloven',
+  },
+  {
+    id: 'SF/forskrift/2018-07-02-1108',
+    tags: ['epostforskriften', 'ekomforskriften', 'cookies', 'epost', 'markedsføring'],
+    title: 'Epostforskriften',
+  },
+  {
+    id: 'PROP/forarbeid/prop-56-ls-201718',
+    tags: ['prop 56', 'forarbeid personopplysningsloven', 'prop personopplysning'],
+    title: 'Prop. 56 LS (2017–18) Personopplysningsloven',
+  },
+  {
+    id: 'PROP/forarbeid/prop-158-l-202021',
+    tags: ['prop 158', 'forarbeid personopplysningsloven', 'ytringsfrihet', 'informasjonsfrihet', 'offentleglova'],
+    title: 'Prop. 158 L (2020–21) Endr. personopplysningsloven og offentleglova (ytrings- og informasjonsfrihet mv.)',
+  },
 
-CSS-VARIABLER
-─────────────
-Alle farger bruker Solarized-paletten definert i :root.
-Semantiske alias: --bg, --text, --accent (cyan), --border, --hover-bg osv.
-Fargekoder for menypunktenes type-indikatorer:
-  .ind-panel (cyan)  .ind-list (violet)  .ind-link (blue)
-  .ind-tool (green)  .ind-port (yellow)  .ind-app (orange)
+  // === HELSE OG FORSKNING ===
+  {
+    id: 'NL/lov/2014-06-20-43',
+    tags: ['helseregisterloven', 'hregl', 'helseregister'],
+    title: 'Helseregisterloven',
+  },
+  {
+    id: 'PROP/forarbeid/prop-72-l-201314',
+    tags: ['prop 72', 'forarbeid helseregisterloven'],
+    title: 'Prop. 72 L (2013–14) Helseregisterloven',
+  },
+  {
+    id: 'NL/lov/2008-06-20-44',
+    tags: ['helseforskningsloven', 'hforsknl', 'helseforskning'],
+    title: 'Helseforskningsloven',
+  },
+  {
+    id: 'PROP/forarbeid/prop-109-l-202425',
+    tags: ['prop 109 l', 'forarbeid helseforskningsloven', 'endring helseforskning 2025'],
+    title: 'Prop. 109 L (2024–25) Endr. helseforskningsloven',
+  },
+  {
+    id: 'NL/lov/2014-06-20-42',
+    tags: ['pasientjournalloven', 'pjl', 'pasientjournal', 'helseopplysninger'],
+    title: 'Pasientjournalloven',
+  },
+  {
+    id: 'PROP/forarbeid/prop-154-l-202425',
+    tags: ['prop 154', 'forarbeid pasientjournalloven', 'taushetsplikt helseopplysninger'],
+    title: 'Prop. 154 L (2024–25) Endr. pasientjournalloven mv.',
+  },
+  {
+    id: 'PROP/forarbeid/prop-152-l-202425',
+    tags: ['prop 152', 'helsedata', 'tilgjengeliggjøring', 'helselovgivningen', 'sikkerhetstiltak'],
+    title: 'Prop. 152 L (2024–25) Endr. helselovgivningen (tilgjengeliggjøring helsedata)',
+  },
+  {
+    id: 'SF/forskrift/2019-06-21-789',
+    tags: ['kvalitetsregisterforskriften', 'medisinske kvalitetsregistre'],
+    title: 'Forskrift om medisinske kvalitetsregistre',
+  },
+  {
+    id: 'NL/lov/2019-06-21-32',
+    tags: ['statistikkloven', 'statl', 'statistikk', 'ssb'],
+    title: 'Statistikkloven',
+  },
+  {
+    id: 'PROP/forarbeid/prop-72-ls-201819',
+    tags: ['prop 72 ls', 'forarbeid statistikkloven'],
+    title: 'Prop. 72 LS (2018–19) Statistikkloven',
+  },
+  {
+    id: 'SF/forskrift/2020-12-11-2731',
+    tags: ['statistikkforskriften', 'forskrift til statistikkloven'],
+    title: 'Statistikkforskriften',
+  },
 
-HURTIGTASTER
-────────────
-Uten åpent panel: bokstavtaster åpner menypunkt (data-key attributt).
-Med åpent panel: Esc lukker, piltaster navigerer, Enter åpner,
-Tab går nedover, venstre/høyre bytter fane (der relevant).
-GDPR-detaljvisning: Esc → tilbake, piltaster → forrige/neste artikkel.
+  // === SIKKERHET ===
+  {
+    id: 'NL/lov/2023-12-20-108',
+    tags: ['digitalsikkerhetsloven', 'digsikl', 'digital sikkerhet', 'nis'],
+    title: 'Digitalsikkerhetsloven',
+  },
+  {
+    id: 'SF/forskrift/2025-06-20-1131',
+    tags: ['digitalsikkerhetsforskriften', 'digsikforskriften'],
+    title: 'Digitalsikkerhetsforskriften',
+  },
+  {
+    id: 'PROP/forarbeid/prop-109-ls-202223',
+    tags: ['prop 109 ls', 'forarbeid digitalsikkerhetsloven', 'prop digitalsikkerhet'],
+    title: 'Prop. 109 LS (2022–23) Digitalsikkerhetsloven',
+  },
+  {
+    id: 'NL/lov/2018-06-01-24',
+    tags: ['sikkerhetsloven', 'sikkl', 'nasjonal sikkerhet', 'nsm', 'klarering'],
+    title: 'Sikkerhetsloven',
+  },
+  {
+    id: 'PROP/forarbeid/prop-153-l-201617',
+    tags: ['prop 153', 'forarbeid sikkerhetsloven'],
+    title: 'Prop. 153 L (2016–17) Sikkerhetsloven',
+  },
 
-SEKSJONER I DENNE FILEN
-────────────────────────
-Koden er delt i seksjoner merket med kommentarer på formen:
-  SECTION: NAVN
-Seksjonene er:
+  // === UTDANNING ===
+  {
+    id: 'NL/lov/2024-03-08-9',
+    tags: ['universitets- og høyskoleloven', 'uh-loven', 'uhl', 'universitet', 'høyskole'],
+    title: 'Universitets- og høyskoleloven',
+  },
+  {
+    id: 'PROP/forarbeid/prop-126-l-202223',
+    tags: ['prop 126', 'forarbeid uh-loven', 'forarbeid universitets- og høyskoleloven'],
+    title: 'Prop. 126 L (2022–23) UH-loven',
+  },
+  {
+    id: 'SF/forskrift/2024-06-28-1392',
+    tags: ['uh-forskriften', 'universitets- og høyskoleforskriften', 'uhforskriften'],
+    title: 'UH-forskriften',
+  },
+  {
+    id: 'NL/lov/2023-06-09-30',
+    tags: ['opplæringsloven', 'opplæringslova', 'oppll', 'opplæring', 'skole'],
+    title: 'Opplæringslova',
+  },
+  {
+    id: 'PROP/forarbeid/prop-57-l-202223',
+    tags: ['prop 57', 'forarbeid opplæringslova'],
+    title: 'Prop. 57 L (2022–23) Opplæringslova',
+  },
+  {
+    id: 'PROP/forarbeid/prop-131-l-202425',
+    tags: ['prop 131', 'individregistre', 'opplæringslova', 'barnehageloven', 'fravær', 'overtredelsesgebyr'],
+    title: 'Prop. 131 L (2024–25) Endr. opplæringslova mv. (individregistre, overtredelsesgebyr)',
+  },
+  {
+    id: 'PROP/forarbeid/prop-79-l-202526',
+    tags: ['prop 79 2025-26', 'opplæringslova samleproposisjon', 'barnehageloven', 'opplæring'],
+    title: 'Prop. 79 L (2025–26) Endr. opplæringslova og barnehageloven mv. (samleproposisjon)',
+  },
 
-  CSS:
-    SECTION: CSS_VARIABLES        – Solarized-palett og semantiske alias
-    SECTION: CSS_CORE             – Body, meny, hurtigtast-stil, cursor
-    SECTION: CSS_PANELS           – Panelkrom: header, tabs, søk, liste
-    SECTION: CSS_DETAIL           – Fullskjerm lesevisning (GDPR-detalj)
-    SECTION: CSS_SEARCH_MISC      – Søke-snippets, kapittelskille, preview
-    SECTION: CSS_RESPONSIVE       – Mobilbrekkpunkter
+  // === BARN OG FAMILIE ===
+  {
+    id: 'NL/lov/1981-04-08-7',
+    tags: ['barneloven', 'barnelova', 'bl', 'barn og foreldre'],
+    title: 'Barnelova',
+  },
+  {
+    id: 'PROP/forarbeid/prop-117-l-202425',
+    tags: ['prop 117', 'forarbeid ny barnelov', 'barnelova', 'barn og foreldre'],
+    title: 'Prop. 117 L (2024–25) Ny barnelov',
+  },
+  {
+    id: 'PROP/forarbeid/prop-94-l-202122',
+    tags: ['prop 94', 'personopplysninger barn', 'frivillige tiltak', 'barne- og familieområdet'],
+    title: 'Prop. 94 L (2021–22) Forskriftshjemmel personopplysninger – frivillige tiltak barne-/familieområdet',
+  },
 
-  HTML:
-    SECTION: HTML_MENU            – Høyrejustert hovedmeny
-    SECTION: HTML_PANELS          – Alle panel-elementer (GDPR, EDPB, Lovdata, DT, Nyheter)
+  // === FORVALTNINGSRETT ===
+  {
+    id: 'NL/lov/1814-05-17',
+    tags: ['grunnloven', 'grl', 'grunnlov', 'konstitusjon', '§ 102', '§ 100'],
+    title: 'Grunnloven',
+  },
+  {
+    id: 'NL/lov/1967-02-10',
+    tags: ['forvaltningsloven', 'fvl', 'forvaltning', 'taushetsplikt', 'enkeltvedtak'],
+    title: 'Forvaltningsloven',
+  },
+  {
+    id: 'PROP/forarbeid/prop-116-l-201213',
+    tags: ['prop 116', 'forarbeid forvaltningsloven endring', 'elektronisk kommunikasjon', 'forvaltning'],
+    title: 'Prop. 116 L (2012–13) Endr. forvaltningsloven (elektronisk kommunikasjon)',
+  },
+  {
+    id: 'NL/lov/2025-06-20-81',
+    tags: ['ny forvaltningslov', 'forvaltningsloven 2025', 'fvl 2025'],
+    title: 'Forvaltningsloven (2025)',
+  },
+  {
+    id: 'PROP/forarbeid/prop-79-l-202425',
+    tags: ['prop 79', 'forarbeid ny forvaltningslov'],
+    title: 'Prop. 79 L (2024–25) Ny forvaltningslov',
+  },
+  {
+    id: 'NL/lov/2006-05-19-16',
+    tags: ['offentleglova', 'offentlighetsloven', 'offl', 'innsyn', 'offentlighet'],
+    title: 'Offentleglova',
+  },
+  {
+    id: 'PROP/forarbeid/otprp-102-200405',
+    tags: ['otprp 102', 'forarbeid offentleglova', 'forarbeid offentlighetsloven'],
+    title: 'Ot.prp. nr. 102 (2004–05) Offentleglova',
+  },
+  {
+    id: 'PROP/forarbeid/otprp-9-200506',
+    tags: ['otprp 9', 'forarbeid offentleglova', 'offentleglova re-fremsettelse'],
+    title: 'Ot.prp. nr. 9 (2005–06) Offentleglova (re-fremsettelse)',
+  },
+  {
+    id: 'PROP/forarbeid/prop-125-l-201011',
+    tags: ['prop 125', 'forarbeid offentleglova endring', 'lønnsoppgåver', 'fødselsnummer', 'offentleglova'],
+    title: 'Prop. 125 L (2010–11) Endr. offentleglova (lønnsoppgåver, fødselsnummer)',
+  },
+  {
+    id: 'PROP/forarbeid/prop-111-l-201516',
+    tags: ['prop 111', 'forarbeid offentleglova vidarebruk', 'vidarebruksdirektivet', 'offentleglova'],
+    title: 'Prop. 111 L (2015–16) Endr. offentleglova (vidarebruksdirektivet)',
+  },
+  {
+    id: 'NL/lov/2025-06-20-96',
+    tags: ['arkivloven', 'arkivlova', 'arkl', 'arkiv', 'dokumentasjon'],
+    title: 'Arkivlova (2025)',
+  },
+  {
+    id: 'PROP/forarbeid/prop-52-l-202425',
+    tags: ['prop 52', 'forarbeid ny arkivlov', 'arkivlova 2025', 'dokumentasjon', 'arkiv'],
+    title: 'Prop. 52 L (2024–25) Ny arkivlov (dokumentasjon og arkiv)',
+  },
+  {
+    id: 'SF/forskrift/2004-06-25-988',
+    tags: ['eforvaltningsforskriften', 'eforv', 'elektronisk kommunikasjon forvaltning'],
+    title: 'eForvaltningsforskriften',
+  },
 
-  JavaScript:
-    SECTION: JS_GLOBALS           – panels-objekt, closeAll, hurtigtast-liste
-    SECTION: JS_GDPR_PANEL        – GDPR-panelets IIFE (list, search, detail, navigation)
-    SECTION: JS_EDPB_PANEL        – EDPB-panelets IIFE
-    SECTION: JS_LOVDATA_PANEL     – Lovdata-panelets IIFE
-    SECTION: JS_DATATILSYNET_PANEL – Datatilsynet-panelets IIFE
-    SECTION: JS_NYHETER_PANEL     – Nyheter-panelets IIFE (enkleste panelet)
-    SECTION: JS_GLOBAL_EVENTS     – Klikk-/tastatur-handlers, overlay
+  // === ARBEIDSLIV ===
+  {
+    id: 'NL/lov/2005-06-17-62',
+    tags: ['arbeidsmiljøloven', 'aml', 'arbeidsmiljø', 'arbeidsforhold'],
+    title: 'Arbeidsmiljøloven',
+  },
 
-VED AI-ASSISTERT REDIGERING
-───────────────────────────
-1. Lim alltid inn denne kontekstblokken + den seksjonen du vil endre.
-2. Referer til seksjonen med navn, f.eks. «endre SECTION: JS_GDPR_PANEL».
-3. Assistenten returnerer bare den oppdaterte seksjonen.
-4. Dersom endringen påvirker andre seksjoner (f.eks. ny CSS for ny funksjon),
-   bør assistenten angi det og returnere begge.
--->
-<!DOCTYPE html>
-<html lang="nb">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hjem</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@300;400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,400&display=swap" rel="stylesheet">
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  // === ANSKAFFELSER ===
+  {
+    id: 'NL/lov/2016-06-17-73',
+    tags: ['anskaffelsesloven', 'offanskl', 'anskaffelse', 'offentlige anskaffelser'],
+    title: 'Anskaffelsesloven',
+  },
+  {
+    id: 'PROP/forarbeid/prop-51-l-201516',
+    tags: ['prop 51', 'forarbeid anskaffelsesloven'],
+    title: 'Prop. 51 L (2015–16) Anskaffelsesloven',
+  },
+  {
+    id: 'PROP/forarbeid/prop-147-l-202425',
+    tags: ['prop 147', 'forarbeid anskaffelsesloven endring', 'samfunnshensyn', 'offentlige anskaffelser'],
+    title: 'Prop. 147 L (2024–25) Endr. anskaffelsesloven (samfunnshensyn mv.)',
+  },
+  {
+    id: 'SF/forskrift/2016-08-12-974',
+    tags: ['anskaffelsesforskriften', 'foa', 'offentlige anskaffelser forskrift'],
+    title: 'Anskaffelsesforskriften',
+  },
 
-  /* ── SECTION: CSS_VARIABLES ── */
-  :root {
-    --base03:  #002b36;
-    --base02:  #073642;
-    --base01:  #586e75;
-    --base00:  #657b83;
-    --base0:   #839496;
-    --base1:   #93a1a1;
-    --base2:   #eee8d5;
-    --base3:   #fdf6e3;
-    --yellow:  #b58900;
-    --orange:  #cb4b16;
-    --red:     #dc322f;
-    --magenta: #d33682;
-    --violet:  #6c71c4;
-    --blue:    #268bd2;
-    --cyan:    #2aa198;
-    --green:   #859900;
+  // === DATA OG FORVALTNING ===
+  {
+    id: 'PROP/forarbeid/prop-54-ls-202526',
+    tags: ['prop 54 ls', 'dataforvaltningsloven', 'datadeling', 'åpne data', 'dataforvaltningsforordningen'],
+    title: 'Prop. 54 LS (2025–26) Dataforvaltningsloven (datadeling og dataforvaltning)',
+  },
+];
 
-    --bg:       var(--base3);
-    --bg-panel: var(--base2);
-    --bg-input: var(--base3);
-    --text:     var(--base01);
-    --text-mid: var(--base00);
-    --text-dim: var(--base1);
-    --border:   #c9c1ad;
-    --border-lt:var(--base2);
-    --accent:   var(--cyan);
-    --hover-bg: rgba(0,0,0,0.04);
-  }
+const datatilsynetData = [
 
-  /* ── SECTION: CSS_CORE ── */
-  body {
-    font-family: 'Azeret Mono', monospace;
-    background: var(--bg);
-    color: var(--text-mid);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    -webkit-font-smoothing: antialiased;
-  }
+  // === PLIKTER OG PRINSIPPER ===
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/',
+    tags: ['plikter', 'virksomhet', 'oversikt'],
+    title: 'Virksomhetenes plikter (oversikt)',
+  },
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/personvernprinsippene/grunnleggende-personvernprinsipper/',
+    tags: ['prinsipper', 'art. 5', 'grunnleggende', 'personvernprinsipper'],
+    title: 'Veileder om personvernprinsippene',
+  },
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/fastsette-formal/',
+    tags: ['formål', 'formålsbegrensning'],
+    title: 'Fastsette formål',
+  },
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/om-behandlingsgrunnlag/',
+    tags: ['behandlingsgrunnlag', 'art. 6', 'samtykke', 'rettslig grunnlag'],
+    title: 'Behandlingsgrunnlag',
+  },
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/om-behandlingsgrunnlag/nodvendig-for-a-ivareta-legitime-interesser---interesseavveiing/',
+    tags: ['interesseavveining', 'berettiget interesse', 'art. 6(1)(f)', 'legitime interesser'],
+    title: 'Interesseavveining (art. 6(1)(f))',
+    // sjekk URL – lang sti
+  },
 
-  .page { text-align: right; font-size: 1.1rem; font-weight: 400; line-height: 2.1; }
+  // === PROTOKOLL, ÅPENHET, RETTIGHETER ===
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/protokoll-over-behandlingsaktiviteter/',
+    tags: ['protokoll', 'behandlingsprotokoll', 'art. 30', 'ropa'],
+    title: 'Protokoll over behandlingsaktiviteter',
+  },
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/informasjon-og-apenhet/',
+    tags: ['informasjonsplikt', 'åpenhet', 'personvernerklæring', 'art. 13', 'art. 14', 'transparens'],
+    title: 'Informasjon og åpenhet',
+  },
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/den-registrertes-rettigheter/',
+    tags: ['rettigheter', 'registrerte', 'innsyn', 'sletting', 'portabilitet'],
+    title: 'Den registrertes rettigheter',
+  },
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/retting-og-sletting/',
+    tags: ['retting', 'sletting', 'art. 16', 'art. 17'],
+    title: 'Retting og sletting',
+  },
 
-  .page > a,
-  .panel-trigger {
-    display: block; width: fit-content; margin-left: auto;
-    color: var(--text-mid); text-decoration: none; position: relative;
-    padding: 1px 6px; margin-right: -6px;
-    border-radius: 3px;
-    cursor: pointer; background: none; border: none;
-    font: inherit; text-align: right; text-transform: lowercase;
-    transition: color 0.08s ease, background-color 0.08s ease;
-  }
-  .page > a:hover,
-  .panel-trigger:hover { color: var(--text); background: var(--hover-bg); }
-  .panel-trigger.active { color: var(--accent); }
+  // === SIKKERHET OG INTERNKONTROLL ===
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/informasjonssikkerhet-internkontroll/',
+    tags: ['informasjonssikkerhet', 'internkontroll', 'art. 32', 'sikkerhet', 'tiltak'],
+    title: 'Informasjonssikkerhet og internkontroll',
+  },
 
-  .page > a:hover .hk,
-  .panel-trigger:hover .hk { color: var(--accent); }
-  .panel-trigger.active .hk { color: var(--accent); }
+  // === BEHANDLINGSANSVARLIG OG DATABEHANDLER ===
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/behandlingsansvarlig-og-databehandler/',
+    tags: ['behandlingsansvarlig', 'databehandler', 'roller', 'art. 26', 'art. 28'],
+    title: 'Behandlingsansvarlig og databehandler',
+  },
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/hvordan-lage-en-databehandleravtale/',
+    tags: ['databehandleravtale', 'dba', 'art. 28', 'avtale'],
+    title: 'Databehandleravtale',
+  },
 
-  .hk {
-    text-decoration: underline;
-    text-underline-offset: 0.25em;
-    text-decoration-color: var(--base1);
-    transition: color 0.08s ease, text-decoration-color 0.08s ease;
-  }
-  .page > a:hover .hk,
-  .panel-trigger:hover .hk,
-  .panel-trigger.active .hk {
-    text-decoration-color: var(--accent);
-  }
+  // === DPIA ===
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/vurdering-av-personvernkonsekvenser/',
+    tags: ['dpia', 'personvernkonsekvenser', 'art. 35', 'konsekvensvurdering', 'pvk'],
+    title: 'DPIA – veileder',
+  },
 
-  .ind {
-    display: inline-block;
-    width: 3.5em;
-    text-align: left;
-    margin-left: 0.4em;
-    letter-spacing: 0.02em;
-    font-weight: 400;
-    transition: color 0.08s ease;
-  }
-  .ind-panel { color: var(--cyan); }
-  .ind-list  { color: var(--violet); }
-  .ind-link  { color: var(--blue); }
-  .ind-tool  { color: var(--green); }
-  .ind-port  { color: var(--yellow); }
-  .ind-app   { color: var(--orange); }
+  // === INNEBYGD PERSONVERN ===
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/innebygd-personvern-og-personvern-som-standard/',
+    tags: ['innebygd personvern', 'privacy by design', 'art. 25', 'pbd', 'standardinnstilling'],
+    title: 'Innebygd personvern og personvern som standard',
+  },
+  {
+    url: 'https://www.datatilsynet.no/regelverk-og-verktoy/veiledere/programvareutvikling-med-innebygd-personvern/',
+    tags: ['programvareutvikling', 'innebygd personvern', 'utvikler', 'software'],
+    title: 'Programvareutvikling med innebygd personvern',
+    // sjekk URL – kan ha endret sti
+  },
 
-  .cursor-line {
-    text-align: right; padding-right: 6px; margin-top: 4px;
-    color: var(--text-dim); font-size: 1.1rem;
-  }
-  .cursor {
-    display: inline-block; width: 0.55em; height: 1.1em;
-    background: var(--accent); vertical-align: text-bottom;
-    margin-left: 2px;
-    animation: blink 1s step-end infinite;
-  }
-  @keyframes blink { 50% { opacity: 0; } }
+  // === OVERFØRING TIL TREDJELAND ===
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/overforing-av-personopplysninger-ut-av-eos/',
+    tags: ['overføring', 'tredjeland', 'eøs', 'schrems', 'kapittel v', 'scc', 'standardkontrakt', 'tia'],
+    title: 'Overføring av personopplysninger ut av EØS',
+  },
+  {
+    url: 'https://www.datatilsynet.no/aktuelt/aktuelle-nyheter-2023/nye-regler-for-overforing-av-personopplysninger-til-usa/',
+    tags: ['usa', 'overføring', 'adekvansbeslutning', 'data privacy framework', 'dpf'],
+    title: 'Overføring til USA (DPF)',
+  },
+  {
+    url: 'https://www.datatilsynet.no/aktuelt/aktuelle-nyheter-2021/nye-standardavtaler/',
+    tags: ['standardavtale', 'scc', 'standardkontrakt', 'overføring', 'databehandleravtale'],
+    title: 'Nye standardavtaler (SCC)',
+  },
 
-/* ── SECTION: CSS_PANELS ── */
-  .panel {
-    position: fixed; top: 0; width: 520px; height: 100vh;
-    background: var(--bg-panel);
-    transition: transform 0.4s cubic-bezier(0.25,0.1,0.25,1),
-                width 0.45s cubic-bezier(0.25,0.1,0.25,1),
-                background-color 0.5s ease;
-    z-index: 100; display: flex; flex-direction: column;
-  }
-  .panel.from-right { right: 0; border-left: 1px solid var(--border); transform: translateX(100%); }
-  .panel.from-left  { left: 0;  border-right: 1px solid var(--border); transform: translateX(-100%); }
-  .panel.open { transform: translateX(0); }
+  // === AVVIK ===
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/avvik/',
+    tags: ['avvik', 'brudd', 'databrudd', 'art. 33', 'art. 34', 'varsling', 'notifikasjon'],
+    title: 'Brudd på personopplysningssikkerheten (avvik)',
+  },
 
-  .panel-header { padding: 1.5rem 1.5rem 0; flex-shrink: 0; transition: background-color 0.5s ease; }
-  .panel-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-  .panel-title {
-    font-size: 0.9rem; font-weight: 400; color: var(--accent);
-    letter-spacing: 0.05em; text-transform: lowercase;
-  }
-  .panel-close {
-    background: none; border: none; color: var(--text-dim);
-    font-family: inherit; font-size: 0.85rem; cursor: pointer;
-    padding: 0.2em 0.4em; border-radius: 3px;
-    transition: color 0.08s ease, background-color 0.08s ease;
-  }
-  .panel-close:hover { color: var(--text); background: var(--hover-bg); }
+  // === PERSONVERNOMBUD ===
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/personvernombud/',
+    tags: ['personvernombud', 'pvo', 'dpo', 'art. 37', 'art. 38', 'art. 39', 'ombud'],
+    title: 'Personvernombud',
+  },
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/personvernombud/personvernombudets-oppgaver/',
+    tags: ['personvernombud', 'oppgaver', 'dpo', 'rolle'],
+    title: 'Personvernombudets oppgaver',
+  },
 
-  .panel-tabs { display: flex; gap: 0; margin-bottom: 1rem; }
-  .panel-tab {
-    flex: 1; padding: 0.45em 0; background: none; border: 1px solid var(--border);
-    color: var(--text-mid); font: inherit; font-size: 0.9rem; font-weight: 400;
-    cursor: pointer; transition: all 0.15s ease; letter-spacing: 0.02em;
-    text-transform: lowercase;
-  }
-  .panel-tab:first-child { border-radius: 3px 0 0 3px; }
-  .panel-tab:last-child  { border-radius: 0 3px 3px 0; border-left: none; }
-  .panel-tab.active { background: var(--accent); border-color: var(--accent); color: var(--base3); }
+  // === KUNSTIG INTELLIGENS ===
+  {
+    url: 'https://www.datatilsynet.no/regelverk-og-verktoy/rapporter-og-utredninger/kunstig-intelligens/',
+    tags: ['ki', 'ai', 'kunstig intelligens', 'maskinlæring'],
+    title: 'Kunstig intelligens og personvern (rapport)',
+    // sjekk URL
+  },
+  {
+    url: 'https://www.datatilsynet.no/regelverk-og-verktoy/sandkasse-for-kunstig-intelligens/',
+    tags: ['sandkasse', 'sandbox', 'ki', 'ai', 'innovasjon'],
+    title: 'Sandkasse for kunstig intelligens',
+  },
 
-  .panel-search {
-    width: 100%; padding: 0.55em 0.8em; background: var(--bg-input);
-    border: 1px solid var(--border); border-radius: 3px; color: var(--text);
-    font: inherit; font-size: 0.9rem; font-weight: 400; outline: none;
-    transition: border-color 0.15s ease; margin-bottom: 0.5rem;
-  }
-  .panel-search::placeholder { color: var(--text-dim); }
-  .panel-search:focus { border-color: var(--accent); }
+  // === TEMAER: FORSKNING, BARN, ARBEIDSLIV ===
+  {
+    url: 'https://www.datatilsynet.no/personvern-pa-ulike-omrader/forskning-helse-og-velferd/',
+    tags: ['forskning', 'helse', 'velferd', 'rek', 'vitenskapelig'],
+    title: 'Forskning, helse og velferd',
+  },
+  {
+    url: 'https://www.datatilsynet.no/personvern-pa-ulike-omrader/skole-barn-unge/',
+    tags: ['barn', 'unge', 'skole', 'samtykke', 'utdanning'],
+    title: 'Barn, unge og skole',
+  },
+  {
+    url: 'https://www.datatilsynet.no/personvern-pa-ulike-omrader/personvern-pa-arbeidsplassen/',
+    tags: ['arbeidsplass', 'ansatt', 'arbeidsgiver', 'epost', 'innsyn', 'kontroll'],
+    title: 'Personvern på arbeidsplassen',
+  },
+  {
+    url: 'https://www.datatilsynet.no/personvern-pa-ulike-omrader/overvaking-og-sporing/',
+    tags: ['overvåking', 'kamera', 'sporing', 'gps'],
+    title: 'Overvåking, sporing og varsling',
+  },
 
-  .panel-list {
-    flex: 1; overflow-y: auto; padding: 0.5rem 1.5rem 1.5rem;
-    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
-  }
-  .panel-list::-webkit-scrollbar { width: 4px; }
-  .panel-list::-webkit-scrollbar-track { background: transparent; }
-  .panel-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  // === VERKTØY OG REFERANSE ===
+  {
+    url: 'https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/sjekkliste/',
+    tags: ['sjekkliste', 'virksomhet', 'komme i gang'],
+    title: 'Sjekkliste for virksomheten',
+  },
+  {
+    url: 'https://www.datatilsynet.no/regelverk-og-verktoy/lover-og-regler/',
+    tags: ['regelverk', 'lover', 'regler', 'gdpr', 'personopplysningsloven'],
+    title: 'Lover og regler',
+  },
+  {
+    url: 'https://www.datatilsynet.no/regelverk-og-verktoy/ordliste/',
+    tags: ['ordliste', 'begreper', 'definisjon'],
+    title: 'Ordliste',
+  },
+  {
+    url: 'https://www.datatilsynet.no/regelverk-og-verktoy/ordbok/',
+    tags: ['ordbok', 'norsk', 'engelsk', 'oversettelse'],
+    title: 'Ordbok (norsk–engelsk)',
+  },
+  {
+    url: 'https://www.datatilsynet.no/regelverk-og-verktoy/sporsmal-svar/',
+    tags: ['faq', 'spørsmål', 'svar'],
+    title: 'Spørsmål og svar',
+  },
 
-  .panel-item {
-    display: flex; align-items: baseline; gap: 0.7em;
-    padding: 0.4em 0.4em; text-decoration: none; color: var(--text);
-    font-size: 0.95rem; font-weight: 400;
-    border-bottom: 1px solid var(--border-lt);
-    border-radius: 2px;
-    transition: background-color 0.06s ease;
-  }
-  .panel-item:hover, .panel-item.kb-active { background: var(--hover-bg); }
-  .panel-item .num {
-    flex-shrink: 0; width: 6.5em; text-align: right; font-weight: 500;
-    color: var(--accent); font-size: 0.85rem;
-  }
-  .panel-item .title {
-    flex: 1; line-height: 1.5;
-    font-family: 'Azeret Mono', monospace; font-weight: 400;
-    font-size: 0.9rem; color: var(--text-mid);
-  }
-  .panel-item:hover .title, .panel-item.kb-active .title { color: var(--text); }
-  .panel-empty { color: var(--text-dim); font-size: 0.85rem; font-weight: 400; padding: 1em 0.3em; font-style: italic; }
-
-  .overlay {
-    position: fixed; inset: 0; background: rgba(0,43,54,0.08);
-    opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 99;
-  }
-  .overlay.open { opacity: 1; pointer-events: auto; }
-
-  .panel-hint {
-    color: var(--text-dim); font-size: 0.75rem; font-weight: 300; padding: 0 0.3em;
-    margin-bottom: 0.5rem;
-  }
-
-  /* ── SECTION: CSS_DETAIL ── */
-  .panel.detail-open {
-    width: 100vw; border-left: none; border-right: none; background: var(--bg);
-  }
-  .panel.detail-open .panel-header { background: var(--bg); }
-  .panel.detail-open .panel-close:hover { color: var(--accent); }
-  .panel.detail-open .panel-list {
-    max-width: none; padding: 2rem calc((100vw - 68ch) / 2) 4rem;
-  }
-  .panel.detail-open .detail-nav   { border-bottom-color: var(--border-lt); }
-  .panel.detail-open .detail-back  { color: var(--text-mid); }
-  .panel.detail-open .detail-back:hover { color: var(--accent); }
-  .panel.detail-open .rettsdata-link { color: var(--text-mid); }
-  .panel.detail-open .rettsdata-link:hover { color: var(--accent); }
-  .panel.detail-open .detail-meta { color: var(--text-mid); }
-  .panel.detail-open .detail-title {
-    color: var(--accent); font-family: 'Source Serif 4', serif;
-    font-size: 1.25rem; font-weight: 500;
-  }
-  .panel.detail-open .detail-body {
-    font-family: 'Source Serif 4', serif; font-size: 1.08rem;
-    font-weight: 400; line-height: 1.7; color: var(--text);
-  }
-  .panel.detail-open .detail-footer { border-top-color: var(--border-lt); }
-  .panel.detail-open .detail-prev,
-  .panel.detail-open .detail-next  { color: var(--text-mid); }
-  .panel.detail-open .detail-prev:hover,
-  .panel.detail-open .detail-next:hover { color: var(--accent); }
-
-  .detail-nav {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border);
-  }
-  .detail-back {
-    background: none; border: none; color: var(--text-mid); font: inherit;
-    font-size: 0.85rem; cursor: pointer; padding: 0.2em 0; transition: color 0.08s;
-  }
-  .detail-back:hover { color: var(--accent); }
-  .rettsdata-link {
-    color: var(--text-mid); font-size: 0.8rem; text-decoration: none;
-    transition: color 0.08s;
-  }
-  .rettsdata-link:hover { color: var(--accent); }
-  .detail-meta {
-    color: var(--text-dim); font-size: 0.8rem; font-weight: 400; margin-bottom: 0.3rem;
-  }
-  .detail-title {
-    color: var(--accent); font-size: 1.05rem; font-weight: 500; line-height: 1.5;
-    margin-bottom: 1.5rem; font-family: 'Source Serif 4', serif;
-  }
-  .detail-body {
-    color: var(--text); font-size: 1rem; font-weight: 400; line-height: 1.7;
-    padding-bottom: 1.5rem; font-family: 'Source Serif 4', serif;
-  }
-  .detail-body .art-para { margin-bottom: 1.2em; }
-  .detail-body .art-points { padding-left: 1.6em; margin-bottom: 1.2em; }
-  .detail-body .art-point { margin-bottom: 0.4em; }
-  .detail-footer {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 0.8rem 0; border-top: 1px solid var(--border); margin-top: 0.5rem;
-  }
-  .detail-prev, .detail-next {
-    background: none; border: none; color: var(--text-mid); font: inherit;
-    font-size: 0.8rem; cursor: pointer; padding: 0.2em 0; transition: color 0.08s;
-  }
-  .detail-prev:hover, .detail-next:hover { color: var(--accent); }
-
-  /* ── SECTION: CSS_SEARCH_MISC ── */
-  .search-snippet {
-    display: block; font-size: 0.75rem; color: var(--text-dim); font-weight: 400;
-    margin-top: 0.2em; line-height: 1.5;
-  }
-  .search-snippet mark {
-    background: rgba(42,161,152,0.12);
-    color: var(--accent); border-radius: 2px; padding: 0 0.15em;
-  }
-  .chapter-divider {
-    display: flex; align-items: baseline; gap: 0.7em;
-    padding: 0.8em 0.3em 0.3em; color: var(--text-dim);
-    font-size: 0.75rem; font-weight: 400; letter-spacing: 0.03em;
-    border-bottom: none; pointer-events: none;
-  }
-  .chapter-divider .num { flex-shrink: 0; width: 4.5em; text-align: right; color: var(--text-dim); }
-  .chapter-divider .title { flex: 1; }
-  .rec-preview {
-    display: block; font-size: 0.75rem; color: var(--text-dim); font-weight: 400;
-    margin-top: 0.15em; line-height: 1.4; white-space: nowrap;
-    overflow: hidden; text-overflow: ellipsis;
-  }
-
-  /* ── SECTION: CSS_RESPONSIVE ── */
-  @media (max-width: 600px) {
-    .page { font-size: 0.95rem; }
-    .panel { width: 100%; }
-    body { padding: 2rem 1.5rem; }
-  }
-</style>
-</head>
-<body>
-
-<!-- ── SECTION: HTML_MENU ── -->
-  <div class="page">
-    <a href="https://booking.webgate.no/" data-key="b"><span class="hk">b</span>erg-hansen <span class="ind ind-tool">.book</span></a>
-    <a href="https://www.claude.ai" data-key="c"><span class="hk">c</span>laude <span class="ind ind-tool">.run</span></a>
-    <button class="panel-trigger" data-panel="datatilsynet" data-key="d"><span class="hk">d</span>atatilsynet <span class="ind ind-panel">.veil</span></button>
-    <button class="panel-trigger" data-panel="edpb" data-key="e"><span class="hk">e</span>dpb guidelines <span class="ind ind-panel">.veil</span></button>
-    <a href="ms-excel:nft|u|" data-key="x">e<span class="hk">x</span>cel <span class="ind ind-app">.app</span></a>
-    <button class="panel-trigger" data-panel="gdpr" data-key="g"><span class="hk">g</span>dpr <span class="ind ind-panel">.lov</span></button>
-    <a href="https://isikt.sharepoint.com/sites/Innsikt" data-key="i"><span class="hk">i</span>nnsikt <span class="ind ind-port">.info</span></a>
-    <a href="https://www.jus.no" data-key="j"><span class="hk">j</span>us <span class="ind ind-link">.edu</span></a>
-    <button class="panel-trigger" data-panel="lovdata" data-key="l"><span class="hk">l</span>ovdata pro <span class="ind ind-panel">.nav</span></button>
-    <a href="Countdown.html" data-key="n"><span class="hk">n</span>edtelling <span class="ind ind-tool">.run</span></a>
-    <button class="panel-trigger" data-panel="nyheter" data-key="y">n<span class="hk">y</span>heter <span class="ind ind-list">.feed</span></button>
-    <a href="ms-powerpoint:nft|u|" data-key="p"><span class="hk">p</span>owerpoint <span class="ind ind-app">.app</span></a>
-    <a href="https://min.rettsdata.no/" data-key="r"><span class="hk">r</span>ettsdata <span class="ind ind-link">.ref</span></a>
-    <a href="spotify://" data-key="s"><span class="hk">s</span>potify <span class="ind ind-app">.ogg</span></a>
-    <a href="msteams://" data-key="t"><span class="hk">t</span>eams <span class="ind ind-app">.app</span></a>
-    <a href="todoist://" data-key="o">t<span class="hk">o</span>doist <span class="ind ind-app">.app</span></a>
-    <a href="ms-word:nft|u|" data-key="w"><span class="hk">w</span>ord <span class="ind ind-app">.app</span></a>
-    <div class="cursor-line">~<span class="cursor"></span></div>
-  </div>
-
-  <!-- ── SECTION: HTML_PANELS ── -->
-  <div class="overlay" id="overlay"></div>
-
-  <!-- GDPR panel -->
-  <div class="panel from-right" id="panel-gdpr">
-    <div class="panel-header">
-      <div class="panel-top">
-        <span class="panel-title">gdpr</span>
-        <button class="panel-close" data-panel="gdpr">esc</button>
-      </div>
-      <div class="panel-tabs" data-panel="gdpr">
-        <button class="panel-tab active" data-tab="art">art. 1–99</button>
-        <button class="panel-tab" data-tab="rec">rec. 1–173</button>
-      </div>
-      <input type="text" class="panel-search" data-panel="gdpr" placeholder="søk nummer, tittel eller innhold...">
-    </div>
-    <div class="panel-list" data-panel="gdpr"></div>
-  </div>
-
-  <!-- EDPB panel -->
-  <div class="panel from-left" id="panel-edpb">
-    <div class="panel-header">
-      <div class="panel-top">
-        <span class="panel-title">edpb</span>
-        <button class="panel-close" data-panel="edpb">esc</button>
-      </div>
-      <div class="panel-tabs" data-panel="edpb">
-        <button class="panel-tab active" data-tab="gl">guidelines</button>
-        <button class="panel-tab" data-tab="recs">recommendations</button>
-      </div>
-      <input type="text" class="panel-search" data-panel="edpb" placeholder="søk nummer eller emne...">
-    </div>
-    <div class="panel-list" data-panel="edpb"></div>
-  </div>
-
-  <!-- Lovdata Pro panel -->
-  <div class="panel from-right" id="panel-lovdata">
-    <div class="panel-header">
-      <div class="panel-top">
-        <span class="panel-title">lovdata pro</span>
-        <button class="panel-close" data-panel="lovdata">esc</button>
-      </div>
-      <input type="text" class="panel-search" data-panel="lovdata" placeholder="søk lov eller forskrift...">
-      <div class="panel-hint">enter uten søk → lovdata pro forside</div>
-    </div>
-    <div class="panel-list" data-panel="lovdata"></div>
-  </div>
-
-  <!-- Datatilsynet panel -->
-  <div class="panel from-left" id="panel-datatilsynet">
-    <div class="panel-header">
-      <div class="panel-top">
-        <span class="panel-title">datatilsynet</span>
-        <button class="panel-close" data-panel="datatilsynet">esc</button>
-      </div>
-      <input type="text" class="panel-search" data-panel="datatilsynet" placeholder="søk veileder, tema eller artikkel...">
-      <div class="panel-hint">enter uten søk → datatilsynet.no</div>
-    </div>
-    <div class="panel-list" data-panel="datatilsynet"></div>
-  </div>
-
-  <!-- Nyheter panel -->
-  <div class="panel from-right" id="panel-nyheter">
-    <div class="panel-header">
-      <div class="panel-top">
-        <span class="panel-title">nyheter</span>
-        <button class="panel-close" data-panel="nyheter">esc</button>
-      </div>
-    </div>
-    <div class="panel-list" data-panel="nyheter">
-      <a class="panel-item" href="https://www.digi.no"><span class="title">digi.no</span></a>
-      <a class="panel-item" href="https://www.khrono.no"><span class="title">khrono</span></a>
-      <a class="panel-item" href="https://www.cw.no"><span class="title">computerworld</span></a>
-      <a class="panel-item" href="https://www.rett24.no"><span class="title">rett24</span></a>
-    </div>
-  </div>
-
-<!-- Data files -->
-<script src="GDPRdata.js"></script>
-<script src="gdpr.js"></script>
-
-<script>
-/* ── SECTION: JS_GLOBALS ── */
-const panels={};
-const hotkeys='gerldjinbyctsxwpo'.split('');
-
-function closeAll(){Object.values(panels).forEach(p=>p.close())}
-
-/* ── SECTION: JS_GDPR_PANEL ── */
-(function(){
-  const el=document.getElementById('panel-gdpr'),header=el.querySelector('.panel-header'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list'),tabBtns=el.querySelectorAll('.panel-tab');
-  let currentTab='art',activeIdx=-1,detailMode=false,detailNr=null,detailType=null;
-
-  function normalizeQuery(q) {
-    return q
-      .replace(/\bartikkel\b/g, 'art.')
-      .replace(/\bartikel\b/g, 'art.')
-      .replace(/\barticle\b/g, 'art.')
-      .replace(/\bfortalepunkt\b/g, 'rec.')
-      .replace(/\brecital\b/g, 'rec.')
-      .replace(/\bkapittel\b/g, 'kap.')
-      .replace(/\bchapter\b/g, 'kap.');
-  }
-
-  const artMap={},recMap={},chMap={};
-  gdpr.articles.forEach(a=>artMap[a.nr]=a);gdpr.recitals.forEach(r=>recMap[r.nr]=r);gdpr.chapters.forEach(c=>chMap[c.nr]=c);
-  const artNrs=gdpr.articles.map(a=>a.nr).sort((a,b)=>a-b),recNrs=gdpr.recitals.map(r=>r.nr).sort((a,b)=>a-b);
-  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-  function formatText(t){const blocks=t.split('\n\n');let h='';for(const block of blocks){const b=block.trim();if(!b)continue;const lines=b.split('\n');if(lines.some(l=>/^[a-zæøå]\)\s/.test(l.trim()))){h+='<div class="art-points">';for(const line of lines)h+=`<p class="art-point">${esc(line.trim())}</p>`;h+='</div>'}else{h+=`<p class="art-para">${esc(b)}</p>`}}return h}
-  function truncate(t,l){const c=t.replace(/\n+/g,' ');return c.length<=l?c:c.slice(0,l).replace(/\s+\S*$/,'')+' …'}
-  function snippet(t,q,l){l=l||90;const i=t.toLowerCase().indexOf(q.toLowerCase());if(i===-1)return'';const a=Math.max(0,i-Math.floor(l/2)),b=Math.min(t.length,i+q.length+Math.floor(l/2));let s=(a>0?'… ':'')+t.slice(a,b)+(b<t.length?' …':'');const re=new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi');return esc(s).replace(re,'<mark>$1</mark>')}
-  function renderList(){activeIdx=-1;currentTab==='art'?renderArticles():renderRecitals()}
-
-  function renderArticles(){
-    const raw = search.value.toLowerCase().trim();
-    const q = normalizeQuery(raw);
-    let html='',any=false;
-    for(const ch of gdpr.chapters){
-      const matches=gdpr.articles.filter(a=>a.ch===ch.nr).filter(a=>{
-        if(!q)return true;
-        if((`art. ${a.nr} ${a.no}`).toLowerCase().includes(q))return true;
-        return raw && a.text.toLowerCase().includes(raw);
-      });
-      if(!matches.length)continue;any=true;
-      html+=`<div class="chapter-divider"><span class="num">kap. ${ch.nr}</span><span class="title">${esc(ch.no).toLowerCase()}</span></div>`;
-      for(const a of matches){
-        const titleHit=!q||(`art. ${a.nr} ${a.no}`).toLowerCase().includes(q);
-        const snip=!titleHit&&raw?`<span class="search-snippet">${snippet(a.text,raw)}</span>`:'';
-        html+=`<a class="panel-item" href="#" data-detail="art" data-nr="${a.nr}"><span class="num">art. ${a.nr}</span><span class="title">${esc(a.no).toLowerCase()}${snip}</span></a>`;
-      }
-    }
-    list.innerHTML=any?html:'<div class="panel-empty">ingen treff</div>';bindClicks();
-  }
-
-  function renderRecitals(){
-    const raw = search.value.toLowerCase().trim();
-    const q = normalizeQuery(raw);
-    let html='',any=false;
-    for(const r of gdpr.recitals){
-      const preview=truncate(r.no,80);
-      if(q){
-        const inLabel=(`rec. ${r.nr} `+preview.toLowerCase()).includes(q);
-        const inBody=raw && r.no.toLowerCase().includes(raw);
-        if(!inLabel&&!inBody)continue;any=true;
-        const snip=!inLabel&&inBody?`<span class="search-snippet">${snippet(r.no,raw)}</span>`:'';
-        html+=`<a class="panel-item" href="#" data-detail="rec" data-nr="${r.nr}"><span class="num">rec. ${r.nr}</span><span class="title"><span class="rec-preview">${esc(preview).toLowerCase()}</span>${snip}</span></a>`;
-      }else{
-        any=true;
-        html+=`<a class="panel-item" href="#" data-detail="rec" data-nr="${r.nr}"><span class="num">rec. ${r.nr}</span><span class="title"><span class="rec-preview">${esc(preview).toLowerCase()}</span></span></a>`;
-      }
-    }
-    list.innerHTML=any?html:'<div class="panel-empty">ingen treff</div>';bindClicks();
-  }
-
-  function bindClicks(){list.querySelectorAll('[data-detail]').forEach(el=>{el.addEventListener('click',e=>{e.preventDefault();showDetail(el.dataset.detail,parseInt(el.dataset.nr))})})}
-  function showDetail(type,nr){detailMode=true;detailType=type;detailNr=nr;header.querySelectorAll('.panel-tabs,.panel-search').forEach(e=>e.style.display='none');el.classList.add('detail-open');type==='art'?renderArtDetail(nr):renderRecDetail(nr)}
-  function renderArtDetail(nr){const a=artMap[nr];if(!a)return;const ch=chMap[a.ch],idx=artNrs.indexOf(nr),prev=idx>0?artNrs[idx-1]:null,next=idx<artNrs.length-1?artNrs[idx+1]:null;list.innerHTML=`<div class="detail-nav"><button class="detail-back">← tilbake</button><span></span></div>${ch?`<div class="detail-meta">kap. ${ch.nr} — ${esc(ch.no).toLowerCase()}</div>`:''}<div class="detail-title">Art. ${nr} — ${esc(a.no)}</div><div class="detail-body">${formatText(a.text)}</div><div class="detail-footer">${prev!=null?`<button class="detail-prev" data-nr="${prev}">← art. ${prev}</button>`:'<span></span>'}${next!=null?`<button class="detail-next" data-nr="${next}">art. ${next} →</button>`:'<span></span>'}</div>`;list.scrollTop=0;bindNav('art')}
-  function renderRecDetail(nr){const r=recMap[nr];if(!r)return;const idx=recNrs.indexOf(nr),prev=idx>0?recNrs[idx-1]:null,next=idx<recNrs.length-1?recNrs[idx+1]:null;const body=r.no.split(/\n\n|\n/).filter(Boolean).map(p=>`<p class="art-para">${esc(p.trim())}</p>`).join('');list.innerHTML=`<div class="detail-nav"><button class="detail-back">← tilbake</button><span></span></div><div class="detail-title">Fortalepunkt ${nr}</div><div class="detail-body">${body}</div><div class="detail-footer">${prev!=null?`<button class="detail-prev" data-nr="${prev}">← rec. ${prev}</button>`:'<span></span>'}${next!=null?`<button class="detail-next" data-nr="${next}">rec. ${next} →</button>`:'<span></span>'}</div>`;list.scrollTop=0;bindNav('rec')}
-  function bindNav(type){list.querySelector('.detail-back').addEventListener('click',hideDetail);const p=list.querySelector('.detail-prev'),n=list.querySelector('.detail-next');if(p)p.addEventListener('click',()=>showDetail(type,parseInt(p.dataset.nr)));if(n)n.addEventListener('click',()=>showDetail(type,parseInt(n.dataset.nr)))}
-  function hideDetail(){detailMode=false;detailNr=null;detailType=null;el.classList.remove('detail-open');header.querySelectorAll('.panel-tabs,.panel-search').forEach(e=>e.style.display='');renderList();list.scrollTop=0;setTimeout(()=>search.focus(),50)}
-  function updateActive(){list.querySelectorAll('.panel-item').forEach((el,i)=>{el.classList.toggle('kb-active',i===activeIdx);if(i===activeIdx)el.scrollIntoView({block:'nearest'})})}
-  tabBtns.forEach(tab=>tab.addEventListener('click',()=>{currentTab=tab.dataset.tab;tabBtns.forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));search.value='';renderList();list.scrollTop=0;search.focus()}));
-  search.addEventListener('input',()=>renderList());
-  panels['gdpr']={el,search,list,render:renderList,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="gdpr"].panel-trigger')?.classList.add('active');if(detailMode)hideDetail();renderList();setTimeout(()=>search.focus(),300)},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="gdpr"].panel-trigger')?.classList.remove('active');search.value='';activeIdx=-1;if(detailMode){detailMode=false;detailNr=null;detailType=null;el.classList.remove('detail-open');header.querySelectorAll('.panel-tabs,.panel-search').forEach(e=>e.style.display='')}},keydown(e){if(!el.classList.contains('open'))return;if(detailMode){if(e.key==='Escape'){e.preventDefault();hideDetail();return}if(e.key==='ArrowLeft'){const p=list.querySelector('.detail-prev');if(p){e.preventDefault();showDetail(detailType,parseInt(p.dataset.nr))}return}if(e.key==='ArrowRight'){const n=list.querySelector('.detail-next');if(n){e.preventDefault();showDetail(detailType,parseInt(n.dataset.nr))}return}return}const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive();if(activeIdx===-1)search.focus()}else if(e.key==='Enter'&&activeIdx>=0&&items[activeIdx]){e.preventDefault();items[activeIdx].click()}else if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&!search.value){e.preventDefault();currentTab=currentTab==='art'?'rec':'art';tabBtns.forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));renderList();list.scrollTop=0;search.focus()}}};
-})();
-
-/* ── SECTION: JS_EDPB_PANEL ── */
-(function(){
-  const el=document.getElementById('panel-edpb'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list'),tabs=el.querySelectorAll('.panel-tab');
-  const data=edpbData,keys=Object.keys(data);let currentTab=keys[0],activeIdx=-1;
-  function render(){const q=search.value.toLowerCase().trim();const items=data[currentTab].filter(item=>(item[0]+' '+item[1]).toLowerCase().includes(q));if(!items.length){list.innerHTML='<div class="panel-empty">ingen treff</div>';return}list.innerHTML=items.map(item=>`<a class="panel-item" href="${item[2]}"><span class="num">${item[0]}</span><span class="title">${item[1].toLowerCase()}</span></a>`).join('')}
-  function updateActive(){list.querySelectorAll('.panel-item').forEach((el,i)=>{el.classList.toggle('kb-active',i===activeIdx);if(i===activeIdx)el.scrollIntoView({block:'nearest'})})}
-  tabs.forEach(tab=>tab.addEventListener('click',()=>{currentTab=tab.dataset.tab;tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));search.value='';activeIdx=-1;render();list.scrollTop=0;search.focus()}));
-  search.addEventListener('input',()=>{render();activeIdx=-1});
-  panels['edpb']={el,search,list,render,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="edpb"].panel-trigger')?.classList.add('active');render();setTimeout(()=>search.focus(),300)},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="edpb"].panel-trigger')?.classList.remove('active');search.value='';activeIdx=-1},keydown(e){if(!el.classList.contains('open'))return;const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive();if(activeIdx===-1)search.focus()}else if(e.key==='Enter'&&activeIdx>=0&&items[activeIdx]){e.preventDefault();items[activeIdx].click()}else if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&!search.value&&keys.length>1){e.preventDefault();const i=keys.indexOf(currentTab);currentTab=keys[(i+1)%keys.length];tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));activeIdx=-1;render();list.scrollTop=0;search.focus()}}};
-})();
-
-/* ── SECTION: JS_LOVDATA_PANEL ── */
-(function(){
-  const el=document.getElementById('panel-lovdata'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list');let activeIdx=-1;
-  function render(){const q=search.value.toLowerCase().trim();const results=q?lovdataLookup.filter(e=>e.tags.some(t=>t.includes(q))||e.title.toLowerCase().includes(q)):lovdataLookup;if(!results.length){list.innerHTML='<div class="panel-empty">ingen treff</div>';return}list.innerHTML=results.map(e=>{const type=e.id.startsWith('SF/')?'forskrift':'lov';return`<a class="panel-item" href="https://lovdata.no/pro/#document/${e.id}"><span class="num">${type}</span><span class="title">${e.title}</span></a>`}).join('')}
-  function updateActive(){list.querySelectorAll('.panel-item').forEach((el,i)=>{el.classList.toggle('kb-active',i===activeIdx);if(i===activeIdx)el.scrollIntoView({block:'nearest'})})}
-  search.addEventListener('input',()=>{render();activeIdx=-1});
-  panels['lovdata']={el,search,list,render,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="lovdata"].panel-trigger')?.classList.add('active');render();setTimeout(()=>search.focus(),300)},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="lovdata"].panel-trigger')?.classList.remove('active');search.value='';activeIdx=-1},keydown(e){if(!el.classList.contains('open'))return;const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive();if(activeIdx===-1)search.focus()}else if(e.key==='Enter'){e.preventDefault();if(activeIdx>=0&&items[activeIdx])items[activeIdx].click();else if(!search.value.trim())window.location.href='https://lovdata.no/pro/#myPage';else if(items.length===1)items[0].click()}else if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}}};
-})();
-
-/* ── SECTION: JS_DATATILSYNET_PANEL ── */
-(function(){
-  const el=document.getElementById('panel-datatilsynet'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list');let activeIdx=-1;
-  function render(){const q=search.value.toLowerCase().trim();const results=q?datatilsynetData.filter(e=>e.tags.some(t=>t.includes(q))||e.title.toLowerCase().includes(q)):datatilsynetData;if(!results.length){list.innerHTML='<div class="panel-empty">ingen treff</div>';return}list.innerHTML=results.map(e=>`<a class="panel-item" href="${e.url}"><span class="title">${e.title.toLowerCase()}</span></a>`).join('')}
-  function updateActive(){list.querySelectorAll('.panel-item').forEach((el,i)=>{el.classList.toggle('kb-active',i===activeIdx);if(i===activeIdx)el.scrollIntoView({block:'nearest'})})}
-  search.addEventListener('input',()=>{render();activeIdx=-1});
-  panels['datatilsynet']={el,search,list,render,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="datatilsynet"].panel-trigger')?.classList.add('active');render();setTimeout(()=>search.focus(),300)},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="datatilsynet"].panel-trigger')?.classList.remove('active');search.value='';activeIdx=-1},keydown(e){if(!el.classList.contains('open'))return;const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive();if(activeIdx===-1)search.focus()}else if(e.key==='Enter'){e.preventDefault();if(activeIdx>=0&&items[activeIdx])items[activeIdx].click();else if(!search.value.trim())window.location.href='https://www.datatilsynet.no/';else if(items.length===1)items[0].click()}else if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}}};
-})();
-
-/* ── SECTION: JS_NYHETER_PANEL ── */
-(function(){
-  const el=document.getElementById('panel-nyheter'),list=el.querySelector('.panel-list');let activeIdx=-1;
-  function updateActive(){list.querySelectorAll('.panel-item').forEach((el,i)=>{el.classList.toggle('kb-active',i===activeIdx);if(i===activeIdx)el.scrollIntoView({block:'nearest'})})}
-  panels['nyheter']={el,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="nyheter"].panel-trigger')?.classList.add('active')},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="nyheter"].panel-trigger')?.classList.remove('active');activeIdx=-1},keydown(e){if(!el.classList.contains('open'))return;const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'||(e.key==='Tab'&&!e.shiftKey)){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive()}else if(e.key==='Enter'&&activeIdx>=0&&items[activeIdx]){e.preventDefault();items[activeIdx].click()}}};
-})();
-
-/* ── SECTION: JS_GLOBAL_EVENTS ── */
-document.querySelectorAll('.panel-trigger').forEach(btn=>{btn.addEventListener('click',()=>{const id=btn.dataset.panel;panels[id].el.classList.contains('open')?panels[id].close():panels[id].open()})});
-document.querySelectorAll('.panel-close').forEach(btn=>{btn.addEventListener('click',()=>panels[btn.dataset.panel].close())});
-document.getElementById('overlay').addEventListener('click',closeAll);
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')closeAll();
-  const anyOpen=Object.values(panels).some(p=>p.el.classList.contains('open'));
-  if(anyOpen){Object.values(panels).forEach(p=>p.keydown(e));return}
-  const key=e.key.toLowerCase();
-  const target=document.querySelector(`[data-key="${key}"]`);
-  if(target&&hotkeys.includes(key)){e.preventDefault();target.click()}
-});
-</script>
-</body>
-</html>
+  // === KONTAKT OG TILSYN ===
+  {
+    url: 'https://www.datatilsynet.no/om-datatilsynet/kontakt-oss/veiledningstjenesten/',
+    tags: ['veiledningstjeneste', 'kontakt', 'telefon', 'rådgivning'],
+    title: 'Veiledningstjenesten',
+  },
+  {
+    url: 'https://www.datatilsynet.no/regelverk-og-verktoy/internasjonalt/retningslinjer-og-uttalelser-fra-personvernradet/',
+    tags: ['edpb', 'personvernrådet', 'retningslinjer', 'norsk oversettelse'],
+    title: 'EDPB-retningslinjer (norske oversettelser)',
+  },
+];
