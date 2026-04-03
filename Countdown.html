@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="nb">
 <head>
@@ -10,39 +11,20 @@
 
   body {
     font-family: 'Azeret Mono', monospace;
-    background: #1e293b;
-    color: #94a3b8;
+    background: #fbf8f1;
+    color: #8a8477;
     height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.8s ease;
   }
+  body.warn { background: #f5e6b8; }
+  body.critical { background: #f0c9a8; }
+  body.done { background: #dc322f; }
 
-  /* ── Ramme ── */
-  .frame {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    border: 0px solid transparent;
-    transition: border-color 0.6s ease, border-width 0.3s ease;
-    z-index: 10;
-  }
-  .frame.warn {
-    border-width: 60px;
-    border-color: #f59e0b;
-  }
-  .frame.critical {
-    border-width: 80px;
-    border-color: #ef4444;
-  }
-  .frame.done {
-    border-width: 100px;
-    border-color: #ef4444;
-  }
-
-  /* ── Tidsvisning ── */
   .time-display {
     display: flex;
     align-items: center;
@@ -50,13 +32,13 @@
     font-size: clamp(80px, 18vw, 210px);
     font-weight: 300;
     letter-spacing: -0.02em;
-    color: #e2e8f0;
+    color: #3a3630;
     user-select: none;
     position: relative;
   }
 
   .time-display .sep {
-    opacity: 0.4;
+    opacity: 0.3;
     margin: 0;
     display: inline-flex;
     align-items: center;
@@ -64,16 +46,11 @@
     width: 0.65ch;
   }
 
-  .time-display .done-text {
-    color: #ef4444;
-  }
-
-  /* ── Inline-redigering ── */
   .time-segment {
     position: relative;
     cursor: default;
     border-radius: 4px;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background 0.15s ease, color 0.15s ease;
     text-align: center;
   }
 
@@ -81,11 +58,11 @@
     cursor: pointer;
   }
   .editing .time-segment:hover {
-    background: #334155;
+    background: #ede8e0;
   }
   .editing .time-segment.active {
-    background: #f59e0b;
-    color: #1e293b;
+    background: #0f6e56;
+    color: #fbf8f1;
   }
 
   .edit-hint {
@@ -95,7 +72,7 @@
     left: 50%;
     transform: translateX(-50%);
     font-size: 1rem;
-    color: #475569;
+    color: #b8b0a4;
     white-space: nowrap;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -104,7 +81,6 @@
     opacity: 1;
   }
 
-  /* ── Knapper ── */
   .controls {
     display: flex;
     gap: 1rem;
@@ -113,41 +89,42 @@
 
   .btn {
     background: none;
-    border: 1px solid #475569;
-    color: #94a3b8;
+    border: 1px solid #d6cfc4;
+    color: #8a8477;
     font-family: inherit;
     font-size: 1.1rem;
     font-weight: 300;
     padding: 0.7em 2em;
     border-radius: 3px;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: all 0.15s ease;
     letter-spacing: 0.03em;
+    text-transform: lowercase;
   }
   .btn:hover {
-    border-color: #f59e0b;
-    color: #f59e0b;
+    border-color: #0f6e56;
+    color: #0f6e56;
   }
-.btn .shortcut {
+  .btn .shortcut {
     display: inline-block;
     margin-left: 1.2em;
     font-size: 0.65em;
-    opacity: 0.5;
-    border: 1px solid #475569;
+    opacity: 0.4;
+    border: 1px solid #d6cfc4;
     border-radius: 3px;
     padding: 0.15em 0.45em;
     vertical-align: middle;
     line-height: 1.4;
-}
-  /* ── Ferdig-tekst ── */
-  .time-display.finished {
-    color: #ef4444;
   }
+
+  body.done .time-display,
+  body.done .btn,
+  body.done .edit-hint { color: #fbf8f1; }
+  body.done .btn { border-color: rgba(251,248,241,0.3); }
+  body.done .btn:hover { border-color: #fbf8f1; color: #fbf8f1; }
 </style>
 </head>
 <body>
-
-<div class="frame" id="frame"></div>
 
 <div class="time-display" id="display">
   <span class="time-segment" data-unit="h" id="seg-h">00</span>
@@ -155,17 +132,16 @@
   <span class="time-segment" data-unit="m" id="seg-m">10</span>
   <span class="sep">:</span>
   <span class="time-segment" data-unit="s" id="seg-s">00</span>
-  <span class="edit-hint">↑↓ juster · Tab neste · Enter bekreft</span>
+  <span class="edit-hint">↑↓ juster · tab neste · enter bekreft</span>
 </div>
 
 <div class="controls">
-  <button class="btn" id="startPauseBtn" onclick="startPause()">Start<span class="shortcut">mellomrom</span></button>
-  <button class="btn" id="setTimeBtn" onclick="enterEditMode()">Juster tid<span class="shortcut">enter</span></button>
-  <button class="btn" id="resetBtn" onclick="resetTimer()">Nullstill<span class="shortcut">shift</span></button>
+  <button class="btn" id="startPauseBtn" onclick="startPause()">start<span class="shortcut">mellomrom</span></button>
+  <button class="btn" id="setTimeBtn" onclick="enterEditMode()">juster tid<span class="shortcut">enter</span></button>
+  <button class="btn" id="resetBtn" onclick="resetTimer()">nullstill<span class="shortcut">shift</span></button>
 </div>
 
 <script>
-  // ── State ──
   let setH = 0, setM = 10, setS = 0;
   let remaining = toMs(setH, setM, setS);
   let endTime = 0;
@@ -177,7 +153,6 @@
 
   function toMs(h, m, s) { return ((h * 3600) + (m * 60) + s) * 1000; }
 
-  // ── Render ──
   function render(ms) {
     if (ms < 0) ms = 0;
     const total = Math.ceil(ms / 1000);
@@ -196,29 +171,25 @@
     document.getElementById('seg-s').textContent = String(editValues.s).padStart(2, '0');
   }
 
-  // ── Frame ──
   function updateFrame(ms) {
-    const frame = document.getElementById('frame');
     const sec = ms / 1000;
-    frame.className = 'frame';
+    document.body.classList.remove('warn', 'critical', 'done');
     if (ms <= 0) {
-      frame.classList.add('done');
+      document.body.classList.add('done');
     } else if (sec <= 30) {
-      frame.classList.add('critical');
+      document.body.classList.add('critical');
     } else if (sec <= 120) {
-      frame.classList.add('warn');
+      document.body.classList.add('warn');
     }
   }
 
-  // ── Timer ──
   function startPause() {
     if (editMode) return;
-
     if (!timerOn) {
       if (remaining <= 0) return;
       timerOn = true;
       endTime = Date.now() + remaining;
-      document.getElementById('startPauseBtn').innerHTML = 'Pause<span class="shortcut">mellomrom</span>';
+      document.getElementById('startPauseBtn').innerHTML = 'pause<span class="shortcut">mellomrom</span>';
       tick();
       interval = setInterval(tick, 250);
     } else {
@@ -226,7 +197,7 @@
       clearInterval(interval);
       remaining = endTime - Date.now();
       if (remaining < 0) remaining = 0;
-      document.getElementById('startPauseBtn').innerHTML = 'Start<span class="shortcut">mellomrom</span>';
+      document.getElementById('startPauseBtn').innerHTML = 'start<span class="shortcut">mellomrom</span>';
     }
   }
 
@@ -238,10 +209,9 @@
       clearInterval(interval);
       timerOn = false;
       const d = document.getElementById('display');
-      d.innerHTML = '<span>Ferdig</span>';
-      d.classList.add('finished');
+      d.innerHTML = '<span>ferdig</span>';
       updateFrame(0);
-      document.getElementById('startPauseBtn').innerHTML = 'Start<span class="shortcut">mellomrom</span>';
+      document.getElementById('startPauseBtn').innerHTML = 'start<span class="shortcut">mellomrom</span>';
       return;
     }
     render(remaining);
@@ -252,35 +222,29 @@
     timerOn = false;
     clearInterval(interval);
     remaining = toMs(setH, setM, setS);
-
     const d = document.getElementById('display');
-    d.classList.remove('finished');
     d.innerHTML = `
       <span class="time-segment" data-unit="h" id="seg-h">00</span>
       <span class="sep">:</span>
       <span class="time-segment" data-unit="m" id="seg-m">10</span>
       <span class="sep">:</span>
       <span class="time-segment" data-unit="s" id="seg-s">00</span>
-      <span class="edit-hint">↑↓ juster · Tab neste · Enter bekreft</span>
+      <span class="edit-hint">↑↓ juster · tab neste · enter bekreft</span>
     `;
     bindSegmentClicks();
     render(remaining);
-    document.getElementById('startPauseBtn').innerHTML = 'Start<span class="shortcut">mellomrom</span>';
+    document.getElementById('startPauseBtn').innerHTML = 'start<span class="shortcut">mellomrom</span>';
   }
 
-  // ── Inline-redigering ──
   function enterEditMode() {
     if (timerOn) return;
     if (editMode) { confirmEdit(); return; }
-
     if (!document.getElementById('seg-h')) resetTimer();
-
     editMode = true;
     const total = Math.ceil(remaining / 1000);
     editValues.h = Math.floor(total / 3600);
     editValues.m = Math.floor((total % 3600) / 60);
     editValues.s = total % 60;
-
     document.getElementById('display').classList.add('editing');
     setActiveSegment('m');
     renderEdit();
@@ -322,19 +286,15 @@
     render(remaining);
   }
 
-  // ── Klikk på segmenter ──
   function bindSegmentClicks() {
     document.querySelectorAll('.time-segment').forEach(el => {
       el.addEventListener('click', () => {
-        if (editMode) {
-          setActiveSegment(el.dataset.unit);
-        }
+        if (editMode) setActiveSegment(el.dataset.unit);
       });
     });
   }
   bindSegmentClicks();
 
-  // ── Tastatur ──
   document.addEventListener('keydown', e => {
     if (editMode) {
       if (e.key === 'ArrowUp') { e.preventDefault(); adjustSegment(1); }
@@ -352,7 +312,6 @@
       }
       return;
     }
-
     if (e.code === 'Space') { e.preventDefault(); startPause(); }
     else if (e.key === 'Enter') { e.preventDefault(); enterEditMode(); }
     else if (e.key === 'Shift') { e.preventDefault(); resetTimer(); }
@@ -367,7 +326,6 @@
     }
   }
 
-  // ── Init ──
   render(remaining);
 </script>
 </body>
