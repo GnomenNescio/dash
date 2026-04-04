@@ -556,6 +556,11 @@ function closeAll(){Object.values(panels).forEach(p=>p.close())}
       .replace(/\bchapter\b/g, 'kap.');
   }
 
+  function extractExactNum(q) {
+    const m = q.match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : null;
+  }
+
   const artMap={},recMap={},chMap={};
   gdpr.articles.forEach(a=>artMap[a.nr]=a);gdpr.recitals.forEach(r=>recMap[r.nr]=r);gdpr.chapters.forEach(c=>chMap[c.nr]=c);
   const artNrs=gdpr.articles.map(a=>a.nr).sort((a,b)=>a-b),recNrs=gdpr.recitals.map(r=>r.nr).sort((a,b)=>a-b);
@@ -568,9 +573,26 @@ function closeAll(){Object.values(panels).forEach(p=>p.close())}
   function renderArticles(){
     const raw = search.value.toLowerCase().trim();
     const q = normalizeQuery(raw);
+    const exactNum = q ? extractExactNum(q) : null;
+
     let html='',any=false;
+    let promoted = null;
+
+    if(exactNum && artMap[exactNum]){
+      const a = artMap[exactNum];
+      const hit = !q || (`art. ${a.nr} ${a.no}`).toLowerCase().includes(q) || (raw && a.text.toLowerCase().includes(raw));
+      if(hit) promoted = a;
+    }
+
+    if(promoted){
+      any = true;
+      const ch = chMap[promoted.ch];
+      html+=`<a class="panel-item" href="#" data-detail="art" data-nr="${promoted.nr}"><span class="num">art. ${promoted.nr}</span><span class="title">${esc(promoted.no).toLowerCase()}</span></a>`;
+    }
+
     for(const ch of gdpr.chapters){
       const matches=gdpr.articles.filter(a=>a.ch===ch.nr).filter(a=>{
+        if(promoted && a.nr===promoted.nr) return false;
         if(!q)return true;
         if((`art. ${a.nr} ${a.no}`).toLowerCase().includes(q))return true;
         return raw && a.text.toLowerCase().includes(raw);
@@ -589,8 +611,26 @@ function closeAll(){Object.values(panels).forEach(p=>p.close())}
   function renderRecitals(){
     const raw = search.value.toLowerCase().trim();
     const q = normalizeQuery(raw);
+    const exactNum = q ? extractExactNum(q) : null;
+
     let html='',any=false;
+    let promoted = null;
+
+    if(exactNum && recMap[exactNum]){
+      const r = recMap[exactNum];
+      const preview = truncate(r.no, 80);
+      const hit = !q || (`rec. ${r.nr} `+preview.toLowerCase()).includes(q) || (raw && r.no.toLowerCase().includes(raw));
+      if(hit) promoted = r;
+    }
+
+    if(promoted){
+      any = true;
+      const preview = truncate(promoted.no, 80);
+      html+=`<a class="panel-item" href="#" data-detail="rec" data-nr="${promoted.nr}"><span class="num">rec. ${promoted.nr}</span><span class="title"><span class="rec-preview">${esc(preview).toLowerCase()}</span></span></a>`;
+    }
+
     for(const r of gdpr.recitals){
+      if(promoted && r.nr===promoted.nr) continue;
       const preview=truncate(r.no,80);
       if(q){
         const inLabel=(`rec. ${r.nr} `+preview.toLowerCase()).includes(q);
@@ -617,7 +657,7 @@ function closeAll(){Object.values(panels).forEach(p=>p.close())}
   search.addEventListener('input',()=>renderList());
   panels['gdpr']={el,search,list,render:renderList,open(){closeAll();el.classList.add('open');document.getElementById('overlay').classList.add('open');document.querySelector('[data-panel="gdpr"].panel-trigger')?.classList.add('active');if(detailMode)hideDetail();renderList();setTimeout(()=>search.focus(),300)},close(){el.classList.remove('open');document.getElementById('overlay').classList.remove('open');document.querySelector('[data-panel="gdpr"].panel-trigger')?.classList.remove('active');search.value='';activeIdx=-1;if(detailMode){detailMode=false;detailNr=null;detailType=null;el.classList.remove('detail-open');header.querySelectorAll('.panel-tabs,.panel-search').forEach(e=>e.style.display='')}},keydown(e){if(!el.classList.contains('open'))return;if(detailMode){if(e.key==='Escape'){e.preventDefault();hideDetail();return}if(e.key==='ArrowLeft'){const p=list.querySelector('.detail-prev');if(p){e.preventDefault();showDetail(detailType,parseInt(p.dataset.nr))}return}if(e.key==='ArrowRight'){const n=list.querySelector('.detail-next');if(n){e.preventDefault();showDetail(detailType,parseInt(n.dataset.nr))}return}return}const items=list.querySelectorAll('.panel-item');if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,-1);updateActive();if(activeIdx===-1)search.focus()}else if(e.key==='Enter'&&activeIdx>=0&&items[activeIdx]){e.preventDefault();items[activeIdx].click()}else if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);updateActive()}else if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&!search.value){e.preventDefault();currentTab=currentTab==='art'?'rec':'art';tabBtns.forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));renderList();list.scrollTop=0;search.focus()}}};
 })();
-
+  
 /* ── SECTION: JS_EDPB_PANEL ── */
 (function(){
   const el=document.getElementById('panel-edpb'),search=el.querySelector('.panel-search'),list=el.querySelector('.panel-list'),tabs=el.querySelectorAll('.panel-tab');
