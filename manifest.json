@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "Hjem",
+  "version": "1.0",
+  "description": "Personlig startside for ny fane",
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  }
+}
