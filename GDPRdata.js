@@ -164,6 +164,7 @@ const edpbData = {
     ["4/2019","Art. 25 — Data Protection by Design and by Default","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-42019-article-25-data-protection-design-and_en"],
     ["1/2024","Processing based on Article 6(1)(f) GDPR","https://www.edpb.europa.eu/our-work-tools/documents/public-consultations/2024/guidelines-12024-processing-personal-data-based_en"],
     ["9/2022","Personal data breach notification under GDPR","https://edpb.europa.eu/our-work-tools/documents/public-consultations/2022/guidelines-92022-personal-data-breach_en"],
+    ["1/2026","Processing of personal data for scientific research purposes","https://www.edpb.europa.eu/our-work-tools/documents/public-consultations/2026/guidelines-12026-processing-personal-data_en"],
     ["1/2021","Examples regarding Data Breach Notification","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-012021-examples-regarding-personal-data-breach_en"],
     ["5/2021","Interplay between Art. 3 and Chapter V (transfers)","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052021-interplay-between-application-article-3_en"],
     ["1/2022","Data subject rights — Right of access","https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-012022-data-subject-rights-right-access_en"],
